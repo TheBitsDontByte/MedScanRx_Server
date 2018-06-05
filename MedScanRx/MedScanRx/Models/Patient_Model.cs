@@ -10,7 +10,8 @@ namespace MedScanRx.Models
         public long PatientId { get; set; }
 
         public DateTime DateOfBirth { get; set; }
-       
+
+        public bool IsActive { get; set; }       
         //This may not be good as a char ?
         public string Gender { get; set; }
 

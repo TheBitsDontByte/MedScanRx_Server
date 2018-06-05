@@ -26,6 +26,7 @@ namespace MedScanRx.DAL.Mapper
                     EmergencyContactPhone = reader["EmergencyContactPhone"].ToString(),
                     PreferredHospital = reader["PreferredHospital"].ToString(),
                     PreferredPhysician = reader["PreferredPhysician"].ToString(),
+                    IsActive = bool.Parse(reader["IsActive"].ToString())
                 };
             }
             catch (Exception ex)

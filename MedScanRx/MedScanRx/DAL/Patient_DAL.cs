@@ -88,5 +88,54 @@ namespace MedScanRx.DAL
             return patient;
         }
 
+        public async Task<bool> SavePatient(Patient_Model patient)
+        {
+            SqlCommand cmd = new SqlCommand
+            {
+                Connection = cn,
+                CommandType = System.Data.CommandType.Text,
+                CommandText = "INSERT INTO Patient (FirstName, LastName, DateOfBirth, Gender, Phone1, Phone2, Email, EmergencyContactName, " +
+                                                    "EmergencyContactRelation, EmergencyContactPhone, PreferredHospital, PreferredPhysician, " +
+                                                    "IsActive, EnteredBy, EnteredDate, ModifiedBy, ModifiedDate) " +
+                                       "VALUES(@FirstName, @LastName, @DateOfBirth, @Gender, @Phone1, @Phone2, @Email, @EmergencyContactName, @EmergencyContactRelation, " +
+                                                "@EmergencyContactPhone, @PreferredHospital, @PreferredPhysician, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
+            };
+
+
+            try
+            {
+                cmd.Parameters.AddWithValue("@FirstName", patient.FirstName);
+                cmd.Parameters.AddWithValue("@LastName", patient.LastName);
+                cmd.Parameters.AddWithValue("@DateOfBirth", patient.DateOfBirth);
+                cmd.Parameters.AddWithValue("@Gender", patient.Gender);
+                cmd.Parameters.AddWithValue("@Phone1", patient.Phone1);
+                cmd.Parameters.AddWithValue("@Phone2", patient.Phone2);
+                cmd.Parameters.AddWithValue("@Email", patient.Email);
+                cmd.Parameters.AddWithValue("@EmergencyContactName", patient.EmergencyContactName);
+                cmd.Parameters.AddWithValue("@EmergencyContactRelation", patient.EmergencyContactRelation);
+                cmd.Parameters.AddWithValue("@EmergencyContactPhone", patient.EmergencyContactPhone);
+                cmd.Parameters.AddWithValue("@PreferredHospital", patient.PreferredHospital);
+                cmd.Parameters.AddWithValue("@PreferredPhysician", patient.PreferredPhysician);
+                cmd.Parameters.AddWithValue("@IsActive", 1);//New patient default to active
+                cmd.Parameters.AddWithValue("@EnteredBy", "Whomst here ?");
+                cmd.Parameters.AddWithValue("@EnteredDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@ModifiedBy", "Whomst here ?");
+                cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.Now);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) == 1;
+            }
+            catch (Exception ex)
+            {
+                //Log
+                throw new DatabaseException($"Something went wrong getting the patient with id {patient.PatientId}.", ex);
+
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
     }
 }

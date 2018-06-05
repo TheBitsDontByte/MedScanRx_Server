@@ -18,5 +18,10 @@ namespace MedScanRx.BLL
         {
             return await _dal.GetPatient(patientId).ConfigureAwait(false);
         }
+
+        public async Task<bool> SavePatient(Patient_Model patient)
+        {
+            return await _dal.SavePatient(patient).ConfigureAwait(false);
+        }
     }
 }
