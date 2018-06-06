@@ -12,11 +12,11 @@ namespace MedScanRx.DAL
     public class Patient_DAL
     {
         //Grab this from appsettings.json instead of here
-        
+
         private static SqlConnection cn = new SqlConnection("Server=DESKTOP-CLVNC1I;Database=MedScanRx;User Id=admin;Password=admin");
 
         public async Task<List<Patient_Model>> GetAllPatients()
-        { 
+        {
             SqlCommand cmd = new SqlCommand
             {
                 Connection = cn,
@@ -28,7 +28,7 @@ namespace MedScanRx.DAL
 
             try
             {
-                
+
                 await cn.OpenAsync().ConfigureAwait(false);
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -69,7 +69,7 @@ namespace MedScanRx.DAL
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
-                        patient = DataRowToPatientMapper.Map(reader);   
+                        patient = DataRowToPatientMapper.Map(reader);
                     //Do i want a check here for more than one row ? I know in the db I've set it up where it just cant happen ... 
                     //Leave as is for now
                 }
@@ -102,7 +102,7 @@ namespace MedScanRx.DAL
                                                 "@EmergencyContactPhone, @PreferredHospital, @PreferredPhysician, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
             };
 
-
+            DateTime now = DateTime.Now;
             try
             {
                 cmd.Parameters.AddWithValue("@FirstName", patient.FirstName);
@@ -119,9 +119,9 @@ namespace MedScanRx.DAL
                 cmd.Parameters.AddWithValue("@PreferredPhysician", patient.PreferredPhysician);
                 cmd.Parameters.AddWithValue("@IsActive", 1);//New patient default to active
                 cmd.Parameters.AddWithValue("@EnteredBy", "Whomst here ?");
-                cmd.Parameters.AddWithValue("@EnteredDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@EnteredDate", now);
                 cmd.Parameters.AddWithValue("@ModifiedBy", "Whomst here ?");
-                cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@ModifiedDate", now);
 
                 await cn.OpenAsync().ConfigureAwait(false);
                 var patientId = (int)await cmd.ExecuteScalarAsync().ConfigureAwait(false);
@@ -131,7 +131,7 @@ namespace MedScanRx.DAL
 
                 patient.PatientId = patientId;
                 return true;
-                
+
             }
             catch (Exception ex)
             {
