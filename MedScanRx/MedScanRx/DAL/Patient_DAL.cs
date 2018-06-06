@@ -97,6 +97,7 @@ namespace MedScanRx.DAL
                 CommandText = "INSERT INTO Patient (FirstName, LastName, DateOfBirth, Gender, Phone1, Phone2, Email, EmergencyContactName, " +
                                                     "EmergencyContactRelation, EmergencyContactPhone, PreferredHospital, PreferredPhysician, " +
                                                     "IsActive, EnteredBy, EnteredDate, ModifiedBy, ModifiedDate) " +
+                                       "output inserted.PatientId " +
                                        "VALUES(@FirstName, @LastName, @DateOfBirth, @Gender, @Phone1, @Phone2, @Email, @EmergencyContactName, @EmergencyContactRelation, " +
                                                 "@EmergencyContactPhone, @PreferredHospital, @PreferredPhysician, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
             };
@@ -123,12 +124,19 @@ namespace MedScanRx.DAL
                 cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.Now);
 
                 await cn.OpenAsync().ConfigureAwait(false);
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) == 1;
+                var patientId = (int)await cmd.ExecuteScalarAsync().ConfigureAwait(false);
+                //Check that a valid patientId was generated
+                if (patientId < 100000)
+                    return false;
+
+                patient.PatientId = patientId;
+                return true;
+                
             }
             catch (Exception ex)
             {
                 //Log
-                throw new DatabaseException($"Something went wrong getting the patient with id {patient.PatientId}.", ex);
+                throw new DatabaseException($"Something went wrong saving the patient.", ex);
 
             }
             finally

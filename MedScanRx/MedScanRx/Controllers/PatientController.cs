@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using MedScanRx.BLL;
 using MedScanRx.Models;
@@ -31,15 +32,22 @@ namespace MedScanRx.Controllers
         }
 
         [Route("SavePatient")]
-        [HttpOptions]
         public async Task<IActionResult> SavePatient([FromBody] Patient_Model patient)
         {
-            var success = await _bll.SavePatient(patient).ConfigureAwait(false);
-            if (success)
-                return Ok();
+            try
+            {
+                var x = this;
+                var success = await _bll.SavePatient(patient).ConfigureAwait(false);
+                if (success)
+                    return Ok(patient);
 
-            return BadRequest();
-    
+                return BadRequest();
+
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
 ;
         }
 
