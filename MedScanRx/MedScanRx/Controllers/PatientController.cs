@@ -20,15 +20,24 @@ namespace MedScanRx.Controllers
         public IActionResult GetAllPatients()
         {
             var allPatients = _bll.GetAllPatients();
-        
+
             return Ok(allPatients);
         }
 
         [Route("{patientId}")]
-        public IActionResult GetPatient([FromRoute]long patientId)
+        public async Task<IActionResult> GetPatient([FromRoute]long patientId)
         {
-            var patient = _bll.GetPatient(patientId);
-            return Ok(patient);
+            try
+            {
+                var patient = await _bll.GetPatient(patientId).ConfigureAwait(false);
+                if (patient == null)
+                    return NoContent();
+                return Ok(patient);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [Route("SavePatient")]
@@ -43,12 +52,28 @@ namespace MedScanRx.Controllers
 
                 return BadRequest();
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
 
-;
+        [Route("UpdatePatient")]
+        public async Task<IActionResult> UpdatePatient([FromBody]Patient_Model patient)
+        {
+            try
+            {
+                var success = await _bll.UpdatePatient(patient).ConfigureAwait(false);
+                if (success)
+                    return Ok(patient);
+
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }

@@ -16,7 +16,7 @@ namespace MedScanRx.DAL.Mapper
                     PatientId = (int)reader["PatientId"],
                     FirstName = reader["FirstName"].ToString(),
                     LastName = reader["LastName"].ToString(),
-                    DateOfBirth = (DateTime)reader["DateOfBirth"],
+                    DateOfBirth = ((DateTime)reader["DateOfBirth"]).Date,
                     Gender = reader["Gender"].ToString(),
                     Phone1 = reader["Phone1"].ToString(),
                     Phone2 = reader["Phone2"].ToString(),

@@ -90,21 +90,22 @@ namespace MedScanRx.DAL
 
         public async Task<bool> SavePatient(Patient_Model patient)
         {
-            SqlCommand cmd = new SqlCommand
-            {
-                Connection = cn,
-                CommandType = System.Data.CommandType.Text,
-                CommandText = "INSERT INTO Patient (FirstName, LastName, DateOfBirth, Gender, Phone1, Phone2, Email, EmergencyContactName, " +
-                                                    "EmergencyContactRelation, EmergencyContactPhone, PreferredHospital, PreferredPhysician, " +
-                                                    "IsActive, EnteredBy, EnteredDate, ModifiedBy, ModifiedDate) " +
-                                       "output inserted.PatientId " +
-                                       "VALUES(@FirstName, @LastName, @DateOfBirth, @Gender, @Phone1, @Phone2, @Email, @EmergencyContactName, @EmergencyContactRelation, " +
-                                                "@EmergencyContactPhone, @PreferredHospital, @PreferredPhysician, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
-            };
-
-            DateTime now = DateTime.Now;
             try
             {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = "INSERT INTO Patient (FirstName, LastName, DateOfBirth, Gender, Phone1, Phone2, Email, EmergencyContactName, " +
+                                                   "EmergencyContactRelation, EmergencyContactPhone, PreferredHospital, PreferredPhysician, " +
+                                                   "IsActive, EnteredBy, EnteredDate, ModifiedBy, ModifiedDate) " +
+                                      "output inserted.PatientId " +
+                                      "VALUES(@FirstName, @LastName, @DateOfBirth, @Gender, @Phone1, @Phone2, @Email, @EmergencyContactName, @EmergencyContactRelation, " +
+                                               "@EmergencyContactPhone, @PreferredHospital, @PreferredPhysician, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
+                };
+
+                DateTime now = DateTime.Now;
+
                 cmd.Parameters.AddWithValue("@FirstName", patient.FirstName);
                 cmd.Parameters.AddWithValue("@LastName", patient.LastName);
                 cmd.Parameters.AddWithValue("@DateOfBirth", patient.DateOfBirth);
@@ -131,6 +132,57 @@ namespace MedScanRx.DAL
 
                 patient.PatientId = patientId;
                 return true;
+
+            }
+            catch (Exception ex)
+            {
+                //Log
+                throw new DatabaseException($"Something went wrong saving the patient.", ex);
+
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        public async Task<bool> UpatePatient(Patient_Model patient)
+        {
+            try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = "UPDATE [dbo].[Patient] SET[FirstName] = @FirstName, [LastName] = @LastName, " +
+                            "[DateOfBirth] = @DateOfBirth, [Gender] = @Gender, [Phone1] = @Phone1, [Phone2] = @Phone2, [Email] = @Email," +
+                            " [EmergencyContactName] = @EmergencyContactName, [EmergencyContactRelation] = @EmergencyContactRelation, " +
+                            "[EmergencyContactPhone] = @EmergencyContactPhone, [PreferredHospital] = @PreferredHospital, " +
+                            "[PreferredPhysician] = @PreferredPhysician, [ModifiedBy] = @ModifiedBy, [ModifiedDate] = @ModifiedDate " +
+                            "WHERE PatientId = @PatientId "
+                };
+
+                cmd.Parameters.AddWithValue("@FirstName", patient.FirstName);
+                cmd.Parameters.AddWithValue("@LastName", patient.LastName);
+                cmd.Parameters.AddWithValue("@DateOfBirth", patient.DateOfBirth);
+                cmd.Parameters.AddWithValue("@Gender", patient.Gender);
+                cmd.Parameters.AddWithValue("@Phone1", patient.Phone1);
+                cmd.Parameters.AddWithValue("@Phone2", patient.Phone2);
+                cmd.Parameters.AddWithValue("@Email", patient.Email);
+                cmd.Parameters.AddWithValue("@EmergencyContactName", patient.EmergencyContactName);
+                cmd.Parameters.AddWithValue("@EmergencyContactRelation", patient.EmergencyContactRelation);
+                cmd.Parameters.AddWithValue("@EmergencyContactPhone", patient.EmergencyContactPhone);
+                cmd.Parameters.AddWithValue("@PreferredHospital", patient.PreferredHospital);
+                cmd.Parameters.AddWithValue("@PreferredPhysician", patient.PreferredPhysician);
+                cmd.Parameters.AddWithValue("@ModifiedBy", "Whomst here ?");
+                cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@PatientId", patient.PatientId);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                var success = (int)await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+
+                //Check that a valid patientId was generated
+                return success == 1;
 
             }
             catch (Exception ex)

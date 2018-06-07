@@ -10,6 +10,7 @@ namespace MedScanRx.Models
         public long PatientId { get; set; }
 
         public DateTime DateOfBirth { get; set; }
+        public string DateOfBirthDateOnly => DateOfBirth.Date.ToString("yyyy-MM-dd");
 
         public bool IsActive { get; set; }       
         //This may not be good as a char ?
