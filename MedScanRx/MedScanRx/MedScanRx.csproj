@@ -20,4 +20,8 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="BLL\Prescription_BLL.cs" />
+  </ItemGroup>
+
 </Project>

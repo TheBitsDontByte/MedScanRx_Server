@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Net.Http;
+using System.Linq;
 using System.Threading.Tasks;
 using MedScanRx.BLL;
 using MedScanRx.Models;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace MedScanRx.Controllers
 {
@@ -45,14 +43,21 @@ namespace MedScanRx.Controllers
         {
             try
             {
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(m => m.Errors).Select(m => m.ErrorMessage);
+                    return BadRequest(errors);
+                }
+
                 var x = this;
                 var success = await _bll.SavePatient(patient).ConfigureAwait(false);
                 if (success)
                     return Ok(patient);
 
-                return BadRequest();
+                return BadRequest("Unable to save the patient information, please try again" );
 
-            }
+            } 
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -74,6 +79,24 @@ namespace MedScanRx.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [Route("DeletePatient/{patientId}")]
+        public async Task<IActionResult> DeletePatient([FromRoute] long patientId)
+        {
+            try
+            {
+                var success = await _bll.DeletePatient(patientId).ConfigureAwait(false);
+                if (success)
+                    return Ok();
+
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
     }

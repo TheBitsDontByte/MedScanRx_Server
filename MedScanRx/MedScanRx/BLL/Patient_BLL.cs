@@ -27,7 +27,11 @@ namespace MedScanRx.BLL
         public async Task<bool> UpdatePatient(Patient_Model patient)
         {
             return await _dal.UpatePatient(patient).ConfigureAwait(false);
+        }
 
+        public async Task<bool> DeletePatient(long patientId)
+        {
+            return await _dal.DeletePatient(patientId).ConfigureAwait(false);
         }
     }
 }

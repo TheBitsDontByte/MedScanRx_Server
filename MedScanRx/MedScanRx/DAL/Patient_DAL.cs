@@ -111,13 +111,13 @@ namespace MedScanRx.DAL
                 cmd.Parameters.AddWithValue("@DateOfBirth", patient.DateOfBirth);
                 cmd.Parameters.AddWithValue("@Gender", patient.Gender);
                 cmd.Parameters.AddWithValue("@Phone1", patient.Phone1);
-                cmd.Parameters.AddWithValue("@Phone2", patient.Phone2);
+                cmd.Parameters.AddWithValue("@Phone2", patient.Phone2 ?? "");
                 cmd.Parameters.AddWithValue("@Email", patient.Email);
-                cmd.Parameters.AddWithValue("@EmergencyContactName", patient.EmergencyContactName);
-                cmd.Parameters.AddWithValue("@EmergencyContactRelation", patient.EmergencyContactRelation);
-                cmd.Parameters.AddWithValue("@EmergencyContactPhone", patient.EmergencyContactPhone);
-                cmd.Parameters.AddWithValue("@PreferredHospital", patient.PreferredHospital);
-                cmd.Parameters.AddWithValue("@PreferredPhysician", patient.PreferredPhysician);
+                cmd.Parameters.AddWithValue("@EmergencyContactName", patient.EmergencyContactName ?? "");
+                cmd.Parameters.AddWithValue("@EmergencyContactRelation", patient.EmergencyContactRelation ?? "");
+                cmd.Parameters.AddWithValue("@EmergencyContactPhone", patient.EmergencyContactPhone ?? "");
+                cmd.Parameters.AddWithValue("@PreferredHospital", patient.PreferredHospital ?? "");
+                cmd.Parameters.AddWithValue("@PreferredPhysician", patient.PreferredPhysician ?? "");
                 cmd.Parameters.AddWithValue("@IsActive", 1);//New patient default to active
                 cmd.Parameters.AddWithValue("@EnteredBy", "Whomst here ?");
                 cmd.Parameters.AddWithValue("@EnteredDate", now);
@@ -194,6 +194,27 @@ namespace MedScanRx.DAL
             finally
             {
                 cn.Close();
+            }
+        }
+
+        public async Task<bool> DeletePatient(long patientId)
+        {
+            try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = $"UPDATE PATIENT SET IsActive = 0 WHERE PatientId = @PatientId"
+                };
+
+                cmd.Parameters.AddWithValue("@PatientId", patientId);
+
+                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) == 1;
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException($"Something went wrong deleting the patient.", ex);
             }
         }
 
