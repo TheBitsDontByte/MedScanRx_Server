@@ -36,12 +36,18 @@ namespace MedScanRx.Controllers
         [Route("Save")]
         public async Task<IActionResult> SavePrescription([FromBody] Prescription_Model model)
         {
-            var result = await _bll.SavePrescription(model).ConfigureAwait(false);
+            try
+            {
+                var result = await _bll.SavePrescription(model).ConfigureAwait(false);
 
-            if (result)
-                return Ok();
+                if (result)
+                    return Ok();
 
-            return BadRequest();
+                return BadRequest();
+            } catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
 
         }
 

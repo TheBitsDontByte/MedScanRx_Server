@@ -15,7 +15,7 @@ namespace MedScanRx.DAL
         private static SqlConnection cn = new SqlConnection("Server=DESKTOP-CLVNC1I;Database=MedScanRx;User Id=admin;Password=admin");
 
 
-        public async Task<bool> SavePrescription(Prescription_Model model)
+        public async Task<int> SavePrescription(Prescription_Model model)
         {
             try
             {
@@ -23,11 +23,12 @@ namespace MedScanRx.DAL
                 {
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
-                    CommandText = "INSERT INTO [dbo].[Prescription] " + 
+                    CommandText = "INSERT INTO [dbo].[Prescription] " +
                                         "([Ndc], [BrandName], [GenericName],[PatientId],[Barcode],[Color],[Dosage],[Identifier]," +
                                         "[Shape],[DoctorNote],[Warning],[OriginalNumberOfDoses],[CurrentNumberOfDoses]," +
                                         "[OriginalNumberOfRefills],[CurrentNumberOfRefills],[IsActive],[EnteredBy]," +
                                         "[EnteredDate],[ModifiedBy],[ModifiedDate])" +
+                                        "OUTPUT inserted.PrescriptionId " +
                                         "VALUES(@Ndc, @BrandName, @GenericName, @PatientId, @Barcode, @Color, @Dosage, @Identifier, " +
                                         "@Shape, @DoctorNote, @Warning, @OriginalNumberOfDoses, @CurrentNumberOfDoses, @OriginalNumberOfRefills, " +
                                         "@CurrentNumberOfRefills, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
@@ -57,12 +58,50 @@ namespace MedScanRx.DAL
                 cmd.Parameters.AddWithValue("@ModifiedDate", now);
 
                 await cn.OpenAsync().ConfigureAwait(false);
-                return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) == 1;
-
+                return (int) await cmd.ExecuteScalarAsync().ConfigureAwait(false);
+                
             }
             catch (Exception ex)
             {
                 throw new DatabaseException("Something went wrong saving the patient");
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        public async Task<bool> SavePrescriptionAlerts(Prescription_Model model)
+        {
+            try
+            {
+
+                SqlCommand cmd = new SqlCommand
+                {
+                    CommandType = System.Data.CommandType.Text,
+                    Connection = cn
+                };
+
+
+                string cmdString = "INSERT INTO PrescriptionAlert (PrescriptionId, AlertDateTime) VALUES ";
+                cmd.Parameters.AddWithValue("@PrescriptionId", model.PrescriptionId);
+                for(int i = 0; i < model.ScheduledAlerts.Count; i++)
+                {
+                    cmdString += $"(@PrescriptionId, @ScheduledAlert{i}),";
+                    cmd.Parameters.AddWithValue($"@ScheduledAlert{i}", model.ScheduledAlerts.ElementAt(i));
+                }
+                cmd.CommandText = cmdString.Remove(cmdString.LastIndexOf(","), 1);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                var numOfInserts = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+                if (numOfInserts != model.ScheduledAlerts.Count)
+                    throw new Exception("Could not insert alerts for previously inserted prescription");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException(ex.Message);
             }
             finally
             {

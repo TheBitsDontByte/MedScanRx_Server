@@ -26,7 +26,9 @@ namespace MedScanRx.BLL
 
 		public async Task<bool> SavePrescription(Prescription_Model model)
         {
-            return await _dal.SavePrescription(model).ConfigureAwait(false);
+            model.PrescriptionId = await _dal.SavePrescription(model).ConfigureAwait(false);
+            return await _dal.SavePrescriptionAlerts(model).ConfigureAwait(false);
+            
         }
 
 
@@ -40,7 +42,7 @@ namespace MedScanRx.BLL
             if (!string.IsNullOrEmpty(search.GenericName))
                 builtUrl += $"openfda.generic_name:{search.GenericName}+";
             if (!string.IsNullOrEmpty(search.Ndc))
-                builtUrl += $"openfda.product_ndc:{search.Ndc}+";
+                builtUrl += $"openfda.package_ndc:\"{search.Ndc}\"+";
 
             builtUrl += "&limit=15";
 
