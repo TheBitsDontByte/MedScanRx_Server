@@ -12,7 +12,7 @@ namespace MedScanRx.Models
         public string BrandName { get; set; }
         public string GenericName { get; set; }
         public string Ndc { get; set; }
-
+        public string NextAlert { get; set; }
         public string Barcode { get; set; }
         public string Color { get; set; }
         public string Dosage { get; set; }

@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
+using MedScanRx.Models;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using MedScanRx.Exceptions;
-using MedScanRx.Models;
+using System.Collections.Generic;
+using MedScanRx.DAL.Mapper;
 
 namespace MedScanRx.DAL
 {
@@ -102,6 +104,48 @@ namespace MedScanRx.DAL
             catch (Exception ex)
             {
                 throw new DatabaseException(ex.Message);
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        public async Task<List<Prescription_Model>> GetAllPrescriptions(long patientId)
+        {
+            List<Prescription_Model> allPrescriptions = new List<Prescription_Model>();
+
+           try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = " SELECT TOP (1000) p.*, min(pa.AlertDateTime) NextAlert FROM MedScanRx.dbo.Prescription p " +
+                                    " join PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
+                                    " where p.PatientId = @patientId and IsActive = 1" +
+                                    " group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Barcode,Color,Dosage,Identifier,Shape,DoctorNote, " +
+                                    " Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,IsActive," +
+                                    " EnteredBy,EnteredDate,ModifiedBy,ModifiedDate" 
+                };
+
+                cmd.Parameters.AddWithValue("@patientId", patientId);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        allPrescriptions.Add(DataRowToPrescriptionMapper.Map(reader));
+                    }
+                }
+
+                return allPrescriptions;
+
+            }
+            catch(Exception ex)
+            {
+                throw new DatabaseException($"Something went wrong getting all prescriptions for patientId: {patientId}", ex);
             }
             finally
             {

@@ -31,6 +31,10 @@ namespace MedScanRx.BLL
             
         }
 
+        public async Task<List<Prescription_Model>> GetAllPrescriptions(long patientId)
+        {
+            return await _dal.GetAllPrescriptions(patientId).ConfigureAwait(false);
+        }
 
         private string openfdaUrlBuilder(OpenFdaSearch_Model search)
         {

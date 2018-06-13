@@ -51,7 +51,20 @@ namespace MedScanRx.Controllers
 
         }
 
-      
+        [Route("Prescriptions/{patientId}")]
+        public async Task<IActionResult> GetAllPrescriptions(long patientId)
+        {
+            try
+            {
+                var allPrescriptions = await _bll.GetAllPrescriptions(patientId).ConfigureAwait(false);
+
+                return Ok(allPrescriptions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
     }
 }
