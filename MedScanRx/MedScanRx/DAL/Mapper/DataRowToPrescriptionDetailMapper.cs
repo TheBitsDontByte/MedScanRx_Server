@@ -5,7 +5,7 @@ using MedScanRx.Models;
 
 namespace MedScanRx.DAL.Mapper
 {
-    public static class DataRowToPrescriptionMapper
+    public static class DataRowToPrescriptionDetailMapper
     {
         public static Prescription_Model Map(SqlDataReader reader)
         {
@@ -31,9 +31,9 @@ namespace MedScanRx.DAL.Mapper
                     Shape = reader["Shape"].ToString(),
                     Warnings = reader["Warning"].ToString(),
 
-                    NextAlert = reader["NextAlert"].ToString()
                 };
             }
+
             catch (Exception ex)
             {
                 throw new MappingException("Mapping a data row to a prescription model failed", ex);

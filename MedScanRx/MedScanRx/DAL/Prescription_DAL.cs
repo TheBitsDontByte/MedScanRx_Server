@@ -121,7 +121,7 @@ namespace MedScanRx.DAL
                 {
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
-                    CommandText = " SELECT TOP (1000) p.*, min(pa.AlertDateTime) NextAlert FROM MedScanRx.dbo.Prescription p " +
+                    CommandText = " SELECT  p.*, min(pa.AlertDateTime) NextAlert FROM MedScanRx.dbo.Prescription p " +
                                     " join PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
                                     " where p.PatientId = @patientId and IsActive = 1" +
                                     " group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Barcode,Color,Dosage,Identifier,Shape,DoctorNote, " +
@@ -136,7 +136,7 @@ namespace MedScanRx.DAL
                 {
                     while (reader.Read())
                     {
-                        allPrescriptions.Add(DataRowToPrescriptionMapper.Map(reader));
+                        allPrescriptions.Add(DataRowToAllPrescriptionsMapper.Map(reader));
                     }
                 }
 
@@ -146,6 +146,76 @@ namespace MedScanRx.DAL
             catch(Exception ex)
             {
                 throw new DatabaseException($"Something went wrong getting all prescriptions for patientId: {patientId}", ex);
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        public async Task<Prescription_Model> GetPrescription(int prescriptionId)
+        {
+            Prescription_Model model = new Prescription_Model();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = $"SELECT * FROM Prescription WHERE PrescriptionId = @prescriptionId"
+                };
+                cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        model = DataRowToPrescriptionDetailMapper.Map(reader);
+                    }
+                }
+                return model;
+
+            }
+            catch(Exception ex)
+            {
+                throw new DatabaseException($"Something went wrong getting the prescription info for prescriptionId {prescriptionId}", ex);
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        public async Task<List<string>> GetPrescriptionAlerts(int prescriptionId)
+        {
+            List<string> alerts = new List<string>();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = $"SELECT AlertDateTime FROM PrescriptionAlert WHERE PrescriptionId = @prescriptionId"
+                };
+                cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        alerts.Add(DataRowToPrescriptionAlertsMapper.Map(reader));
+                    }
+                }
+                return alerts;
+
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException($"Something went wrong getting the prescription info for prescriptionId {prescriptionId}", ex);
             }
             finally
             {

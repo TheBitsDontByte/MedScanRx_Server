@@ -66,5 +66,19 @@ namespace MedScanRx.Controllers
             }
         }
 
+        [Route("Prescription/{prescriptionId}")]
+        public async Task<IActionResult> GetPrescription(int prescriptionId)
+        {
+            try
+            {
+                var prescription = await _bll.GetPrescription(prescriptionId).ConfigureAwait(false);
+                return Ok(prescription);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, "Something went wrong getting the prescription details");
+            }
+        }
+
     }
 }
