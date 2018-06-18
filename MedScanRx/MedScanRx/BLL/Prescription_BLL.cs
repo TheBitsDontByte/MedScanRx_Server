@@ -43,6 +43,20 @@ namespace MedScanRx.BLL
             return model;
         }
 
+        public async Task<bool> UpdatePrescription(Prescription_Model model)
+        {
+            var prescriptionSuccess = await _dal.UpdatePrescription(model).ConfigureAwait(false);
+            var alertSuccess = await _dal.UpdatePrescriptionAlerts(model).ConfigureAwait(false);
+
+            return (alertSuccess && prescriptionSuccess);
+            
+        }
+        
+        public async Task<bool> DeletePrescriptionAndAlerts(long patientId, int prescriptionId)
+        {
+            return await _dal.DeletePrescriptionAndAlerts(patientId, prescriptionId).ConfigureAwait(false);
+        }
+
         private string openfdaUrlBuilder(OpenFdaSearch_Model search)
         {
             string baseUrl = @"https://api.fda.gov/drug/label.json?search=";

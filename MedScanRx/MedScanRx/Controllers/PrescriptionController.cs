@@ -18,8 +18,6 @@ namespace MedScanRx.Controllers
         {
             try
             {
-
-
                 var result = await _bll.SearchOpenFda(model).ConfigureAwait(false);
                 if (result == null)
                     return NotFound();
@@ -74,9 +72,46 @@ namespace MedScanRx.Controllers
                 var prescription = await _bll.GetPrescription(prescriptionId).ConfigureAwait(false);
                 return Ok(prescription);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, "Something went wrong getting the prescription details");
+            }
+        }
+
+        [Route("UpdatePrescription")]
+        public async Task<IActionResult> UpdatePrescription([FromBody] Prescription_Model model)
+        {
+            try
+            {
+                var result = await _bll.UpdatePrescription(model).ConfigureAwait(false);
+
+                if (result)
+                    return Ok();
+
+                return BadRequest();
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Something went wrong updating the prescription details");
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeletePrescription")]
+        public async Task<IActionResult> DeletePrescription([FromQuery] int prescriptionId, [FromQuery] long patientId)
+        {
+            try
+            {
+                var success = await _bll.DeletePrescriptionAndAlerts(patientId, prescriptionId).ConfigureAwait(false);
+                if (success)
+                    return Ok();
+
+                return BadRequest();
+
+            } catch(Exception ex)
+            {
+                return StatusCode(500, "Something went wrong deleting the prescription");
             }
         }
 
