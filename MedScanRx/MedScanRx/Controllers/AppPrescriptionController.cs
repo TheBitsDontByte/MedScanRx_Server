@@ -46,5 +46,20 @@ namespace MedScanRx.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("AllPrescriptionsWithAlerts/{prescriptionId}")]
+        public async Task<IActionResult> PrescriptionWithAlerts(int prescriptionId)
+        {
+            try
+            {
+                var allPrescriptionsWithAlerts = await _bll.GetPrescriptionWithAlerts(prescriptionId).ConfigureAwait(false);
+                return Ok(allPrescriptionsWithAlerts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errorMessage = "Server error trying to get all prescriptions and alert information" });
+            }
+        }
+
     }
 }

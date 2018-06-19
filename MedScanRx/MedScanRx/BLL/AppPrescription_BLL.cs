@@ -20,5 +20,12 @@ namespace MedScanRx.BLL
         {
             return await _dal.GetAllPrescriptions(patientId).ConfigureAwait(false);
         }
+
+        public async Task<Prescription_Model> GetPrescriptionWithAlerts(int prescriptionId)
+        {
+            var model = await _dal.GetPrescription(prescriptionId).ConfigureAwait(false);
+            model.ScheduledAlerts = await _dal.GetPrescriptionAlerts(prescriptionId).ConfigureAwait(false);
+            return model;
+        }
     }
 }

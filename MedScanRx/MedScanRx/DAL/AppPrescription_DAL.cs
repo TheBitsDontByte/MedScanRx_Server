@@ -97,6 +97,76 @@ namespace MedScanRx.DAL
             }
         }
 
+        public async Task<Prescription_Model> GetPrescription(int prescriptionId)
+        {
+            Prescription_Model model = new Prescription_Model();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = $"SELECT * FROM Prescription WHERE PrescriptionId = @prescriptionId"
+                };
+                cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        model = DataRowToPrescriptionDetailMapper.Map(reader);
+                    }
+                }
+                return model;
+
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException($"Something went wrong getting the prescription info for prescriptionId {prescriptionId}", ex);
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        public async Task<List<string>> GetPrescriptionAlerts(int prescriptionId)
+        {
+            List<string> alerts = new List<string>();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand
+                {
+                    Connection = cn,
+                    CommandType = System.Data.CommandType.Text,
+                    CommandText = $"SELECT AlertDateTime FROM PrescriptionAlert WHERE PrescriptionId = @prescriptionId"
+                };
+                cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        alerts.Add(DataRowToPrescriptionAlertsMapper.Map(reader));
+                    }
+                }
+                return alerts;
+
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException($"Something went wrong getting the prescription info for prescriptionId {prescriptionId}", ex);
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
 
     }
 }

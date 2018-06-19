@@ -3,9 +3,9 @@ C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\bin\Debug\netcor
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\bin\Debug\netcoreapp2.0\MedScanRx.runtimeconfig.dev.json
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\bin\Debug\netcoreapp2.0\MedScanRx.dll
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\bin\Debug\netcoreapp2.0\MedScanRx.pdb
+C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.csprojResolveAssemblyReference.cache
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.csproj.CoreCompileInputs.cache
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.AssemblyInfoInputs.cache
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.AssemblyInfo.cs
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.dll
 C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.pdb
-C:\Users\BUTTHOLE3\Desktop\MedScanRx\Server\MedScanRx\MedScanRx\obj\Debug\netcoreapp2.0\MedScanRx.csprojResolveAssemblyReference.cache
