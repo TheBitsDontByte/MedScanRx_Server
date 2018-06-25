@@ -8,7 +8,6 @@ namespace MedScanRx.Models
     public class OpenFdaSearch_Model
     {
         public string Ndc { get; set; }
-        public string GenericName { get; set; }
-        public string BrandName { get; set; }
+        public string Name { get; set; }
     }
 }

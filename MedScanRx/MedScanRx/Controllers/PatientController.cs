@@ -14,6 +14,8 @@ namespace MedScanRx.Controllers
     {
         public Patient_BLL _bll = new Patient_BLL();
 
+
+        //NOT IN USE AND SET UP POORLY -- REDO BEFORE / IF USING
         [Route("Patients")]
         public IActionResult GetAllPatients()
         {
@@ -29,12 +31,12 @@ namespace MedScanRx.Controllers
             {
                 var patient = await _bll.GetPatient(patientId).ConfigureAwait(false);
                 if (patient == null)
-                    return NoContent();
+                    return NotFound(new { errors = $"No patient found with Patient ID {patientId}" });
                 return Ok(patient);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { errors = ex.Message });
             }
         }
 
@@ -43,24 +45,22 @@ namespace MedScanRx.Controllers
         {
             try
             {
-
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values.SelectMany(m => m.Errors).Select(m => m.ErrorMessage);
-                    return BadRequest(errors);
+                    return BadRequest(new { errors = errors });
                 }
 
-                var x = this;
                 var success = await _bll.SavePatient(patient).ConfigureAwait(false);
                 if (success)
                     return Ok(patient);
 
-                return BadRequest("Unable to save the patient information, please try again" );
+                return BadRequest(new { errors = "Unable to save the patient information, please try again" } );
 
             } 
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { errors = ex.Message });
             }
         }
 
@@ -69,18 +69,27 @@ namespace MedScanRx.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(m => m.Errors).Select(m => m.ErrorMessage);
+                    return BadRequest(new { errors = errors });
+                }
+
                 var success = await _bll.UpdatePatient(patient).ConfigureAwait(false);
                 if (success)
                     return Ok(patient);
 
-                return BadRequest();
+                return BadRequest(new { errors = "Unable to update the patient information, please try again" });
+
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { errors = ex.Message });
             }
         }
 
+
+        //NOT IN USE CURRENTLY -- REDO LIKE ABOVE METHODS BEFORE USING
         [Route("DeletePatient/{patientId}")]
         public async Task<IActionResult> DeletePatient([FromRoute] long patientId)
         {

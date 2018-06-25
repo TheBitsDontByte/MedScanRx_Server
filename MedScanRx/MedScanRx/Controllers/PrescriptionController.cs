@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Net.Http;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using MedScanRx.BLL;
 using MedScanRx.Models;
@@ -13,20 +13,37 @@ namespace MedScanRx.Controllers
     {
         Prescription_BLL _bll = new Prescription_BLL();
 
-        [Route("Search")]
+        [Route("SearchOpenfda")]
         public async Task<IActionResult> SearchOpenFda([FromBody] OpenFdaSearch_Model model)
         {
             try
             {
                 var result = await _bll.SearchOpenFda(model).ConfigureAwait(false);
                 if (result == null)
-                    return NotFound();
+                    return NotFound(new { errors = $"No medicines found with those search terms" });
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errors = ex.Message });
+            }
+
+        }
+
+        [Route("SearchRxcui")]
+        public async Task<IActionResult> SearchRxcui([FromBody] OpenFdaSearch_Model model)
+        {
+            try
+            {
+                var result = await _bll.SearchRxcui(model).ConfigureAwait(false);
+                if (result == null)
+                    return NotFound(new { errors = $"No medicines found with those search terms" });
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { errors = ex.Message });
             }
 
         }

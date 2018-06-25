@@ -107,16 +107,23 @@ namespace MedScanRx.DAL
                 {
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
-                    CommandText = $"SELECT * FROM Prescription WHERE PrescriptionId = @prescriptionId"
+                    CommandText = "SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
+                                    "JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
+                                    "WHERE p.PrescriptionId = @prescriptionId AND pa.IsActive = 1 AND p.IsActive = 1 " +
+                                    "group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Barcode,Color,Dosage,Identifier,Shape,DoctorNote, " +
+                                    "Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
+                                    "EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
+
                 };
                 cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
 
                 await cn.OpenAsync().ConfigureAwait(false);
                 using (var reader = cmd.ExecuteReader())
                 {
+                    //TODO CLEAN THIS WHOLE THING UP I HAD BEEN FORGETTING TO INCLUDE THE NEXT ALERT
                     if (reader.Read())
                     {
-                        model = DataRowToPrescriptionDetailMapper.Map(reader);
+                        model = DataRowToAllPrescriptionsMapper.Map(reader);
                     }
                 }
                 return model;

@@ -33,11 +33,11 @@ namespace MedScanRx.Models
 
         [Phone(ErrorMessage = "Primary phone number is invalid")]
         [Required(ErrorMessage = "A primary phone number is required")]
-        [StringLength(10, ErrorMessage = "Primary phone number must be 10 numeric characters")]
+        [StringLength(12, ErrorMessage = "Primary phone number must be 7 or 10 numeric characters")]
         public string Phone1 { get; set; }
 
         [Phone(ErrorMessage = "Secondary phone number is invalid")]
-        [StringLength(10, ErrorMessage = "Secondary phone number must be 10 numeric characters")]
+        [StringLength(12, ErrorMessage = "Secondary phone number must be 7 or 10 numeric characters")]
         public string Phone2 { get; set; }
 
         [EmailAddress(ErrorMessage = "Email address is invalid")]
@@ -51,7 +51,7 @@ namespace MedScanRx.Models
         public string EmergencyContactRelation { get; set; }
 
         [Phone(ErrorMessage = "Emergency contact phone number is invalid")]
-        [StringLength(10, ErrorMessage = "Emergency contact phone number must be 10 numeric characters")]
+        [StringLength(12, ErrorMessage = "Emergency contact phone number must be 7 or 10 numeric characters")]
         public string EmergencyContactPhone { get; set; }
 
         [StringLength(50, ErrorMessage = "Preferred hospital must be less than 50 characters")]
