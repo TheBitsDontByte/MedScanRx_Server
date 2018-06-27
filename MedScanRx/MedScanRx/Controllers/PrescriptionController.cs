@@ -30,6 +30,23 @@ namespace MedScanRx.Controllers
 
         }
 
+        [Route("SearchOpenfda/{rxcui}")]
+        public async Task<IActionResult> SearchOpenFda(string rxcui)
+        {
+            try
+            {
+                var result = await _bll.SearchOpenFda(rxcui).ConfigureAwait(false);
+                if (result == null)
+                    return NotFound(new { errors = $"No medicines found with that rxcui" });
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { errors = ex.Message });
+            }
+
+        }
+
         [Route("SearchRxcui")]
         public async Task<IActionResult> SearchRxcui([FromBody] OpenFdaSearch_Model model)
         {

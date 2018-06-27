@@ -26,6 +26,19 @@ namespace MedScanRx.BLL
             return  await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
+        public async Task<string> SearchOpenFda(string rxcui)
+        {
+            HttpClient client = new HttpClient();
+            //string url = c3piUrlBuilder(model);
+            string url = $@"https://api.fda.gov/drug/label.json?search=openfda.rxcui:{rxcui}&limit=100";
+            HttpResponseMessage response = await client.GetAsync(url);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return null;
+
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
+
         public async Task<string> SearchRxcui(OpenFdaSearch_Model model)
         {
             HttpClient client = new HttpClient();
