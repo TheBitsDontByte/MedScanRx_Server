@@ -13,7 +13,9 @@ namespace MedScanRx.DAL.Mapper
             {
                 return new Prescription_Model
                 {
-                    Barcode = reader["Barcode"].ToString(),
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    Rxcui = reader["Rxcui"].ToString(),
+                    RximageMedicineName = reader["RximageMedicineName"].ToString(),
                     BrandName = reader["BrandName"].ToString(),
                     Color = reader["Color"].ToString(),
                     CurrentNumberOfDoses = reader["CurrentNumberOfDoses"].ToString(),

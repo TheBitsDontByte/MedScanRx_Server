@@ -7,15 +7,13 @@ using System.Threading.Tasks;
 using MedScanRx.Exceptions;
 using System.Collections.Generic;
 using MedScanRx.DAL.Mapper;
+using System.Configuration;
 
 namespace MedScanRx.DAL
 {
     public class Prescription_DAL
     {
-        //There should be a DAL_Base class with this
-        //The string should be in the config file
         private static SqlConnection cn = new SqlConnection("Server=DESKTOP-CLVNC1I;Database=MedScanRx;User Id=admin;Password=admin");
-
 
         public async Task<int> SavePrescription(Prescription_Model model)
         {
@@ -26,13 +24,13 @@ namespace MedScanRx.DAL
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
                     CommandText = "INSERT INTO [dbo].[Prescription] " +
-                                        "([Ndc], [BrandName], [GenericName],[PatientId],[Barcode],[Color],[Dosage],[Identifier]," +
-                                        "[Shape],[DoctorNote],[Warning],[OriginalNumberOfDoses],[CurrentNumberOfDoses]," +
+                                        "([Ndc], [BrandName], [GenericName], [RximageMedicineName], [PatientId],[Color],[Dosage],[Identifier]," +
+                                        "[Shape], [Rxcui], [ImageUrl], [DoctorNote],[Warning],[OriginalNumberOfDoses],[CurrentNumberOfDoses]," +
                                         "[OriginalNumberOfRefills],[CurrentNumberOfRefills],[IsActive],[EnteredBy]," +
                                         "[EnteredDate],[ModifiedBy],[ModifiedDate])" +
                                         "OUTPUT inserted.PrescriptionId " +
-                                        "VALUES(@Ndc, @BrandName, @GenericName, @PatientId, @Barcode, @Color, @Dosage, @Identifier, " +
-                                        "@Shape, @DoctorNote, @Warning, @OriginalNumberOfDoses, @CurrentNumberOfDoses, @OriginalNumberOfRefills, " +
+                                        "VALUES(@Ndc, @BrandName, @GenericName, @RximageMedicineName, @PatientId, @Color, @Dosage, @Identifier, " +
+                                        "@Shape, @Rxcui, @ImageUrl, @DoctorNote, @Warning, @OriginalNumberOfDoses, @CurrentNumberOfDoses, @OriginalNumberOfRefills, " +
                                         "@CurrentNumberOfRefills, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
                 };
 
@@ -41,12 +39,14 @@ namespace MedScanRx.DAL
                 cmd.Parameters.AddWithValue("@Ndc", model.Ndc);
                 cmd.Parameters.AddWithValue("@BrandName", model.BrandName);
                 cmd.Parameters.AddWithValue("@GenericName", model.GenericName);
+                cmd.Parameters.AddWithValue("@RximageMedicineName", model.RximageMedicineName ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@PatientId", model.PatientId);
-                cmd.Parameters.AddWithValue("@Barcode", model.Barcode);
                 cmd.Parameters.AddWithValue("@Color", model.Color);
                 cmd.Parameters.AddWithValue("@Dosage", model.Dosage);
                 cmd.Parameters.AddWithValue("@Identifier", model.Identifiers);
                 cmd.Parameters.AddWithValue("@Shape", model.Shape);
+                cmd.Parameters.AddWithValue("@Rxcui", model.Rxcui ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@ImageUrl", model.ImageUrl ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@DoctorNote", model.DoctorNotes ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@Warning", model.Warnings ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@OriginalNumberOfDoses", model.OriginalNumberOfDoses);
@@ -126,7 +126,8 @@ namespace MedScanRx.DAL
                     CommandText = " SELECT  p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
                                     " join PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
                                     " where p.PatientId = @patientId and p.IsActive = 1 and pa.IsActive = 1" +
-                                    " group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Barcode,Color,Dosage,Identifier,Shape,DoctorNote, " +
+                                    " group by p.PrescriptionId,Ndc,BrandName,GenericName, RximageMedicineName,PatientId,Color,Dosage,Identifier,Shape," +
+                                    " Rxcui, ImageUrl, DoctorNote, " +
                                     " Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive," +
                                     " EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
                 };
@@ -233,7 +234,7 @@ namespace MedScanRx.DAL
                 {
                     CommandType = System.Data.CommandType.Text,
                     Connection = cn,
-                    CommandText = "UPDATE Prescription SET Ndc = @Ndc, BrandName = @BrandName, GenericName = @GenericName, PatientId = @PatientId, Barcode = @Barcode, Color = @Color, " +
+                    CommandText = "UPDATE Prescription SET Ndc = @Ndc, BrandName = @BrandName, GenericName = @GenericName, PatientId = @PatientId,  Color = @Color, " +
                                     "Dosage = @Dosage, Identifier = @Identifier, Shape = @Shape, DoctorNote = @DoctorNote, Warning = @Warning, CurrentNumberOfDoses = @CurrentNumberOfDoses, " +
                                     "CurrentNumberOfRefills = @CurrentNumberOfRefills, IsActive = @IsActive, ModifiedBy = @ModifiedBy, ModifiedDate = @ModifiedDate " +
                                     " where PrescriptionId = @PrescriptionId"
@@ -243,11 +244,13 @@ namespace MedScanRx.DAL
                 cmd.Parameters.AddWithValue("@BrandName", model.BrandName);
                 cmd.Parameters.AddWithValue("@GenericName", model.GenericName);
                 cmd.Parameters.AddWithValue("@PatientId", model.PatientId);
-                cmd.Parameters.AddWithValue("@Barcode", model.Barcode);
                 cmd.Parameters.AddWithValue("@Color", model.Color);
                 cmd.Parameters.AddWithValue("@Dosage", model.Dosage);
                 cmd.Parameters.AddWithValue("@Identifier", model.Identifiers);
                 cmd.Parameters.AddWithValue("@Shape", model.Shape);
+                cmd.Parameters.AddWithValue("@RximageMedicineName", model.RximageMedicineName ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@Rxcui", model.Rxcui ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@ImageUrl", model.ImageUrl ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@DoctorNote", model.DoctorNotes);
                 cmd.Parameters.AddWithValue("@Warning", model.Warnings);
                 cmd.Parameters.AddWithValue("@CurrentNumberOfDoses", model.CurrentNumberOfDoses);
