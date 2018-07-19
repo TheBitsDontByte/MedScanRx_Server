@@ -16,6 +16,7 @@ namespace MedScanRx.DAL.Mapper
                     ImageUrl = reader["ImageUrl"].ToString(),
                     Rxcui = reader["Rxcui"].ToString(),
                     RximageMedicineName = reader["RximageMedicineName"].ToString(),
+                    PrescriptionName = reader["PrescriptionName"].ToString(),
                     BrandName = reader["BrandName"].ToString(),
                     Color = reader["Color"].ToString(),
                     CurrentNumberOfDoses = reader["CurrentNumberOfDoses"].ToString(),

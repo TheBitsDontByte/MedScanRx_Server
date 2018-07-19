@@ -9,7 +9,12 @@ namespace MedScanRx.BLL
 {
     public class AppPrescription_BLL
     {
-        AppPrescription_DAL _dal = new AppPrescription_DAL();
+        private AppPrescription_DAL _dal;
+
+        public AppPrescription_BLL(string connectionString)
+        {
+            _dal = new AppPrescription_DAL(connectionString);
+        }
 
         public async Task<List<Prescription_Model>> GetUpcomingAlerts(long patientId)
         {

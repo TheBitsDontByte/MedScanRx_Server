@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MedScanRx.BLL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.Controllers
 {
@@ -12,7 +13,15 @@ namespace MedScanRx.Controllers
     [Route("AppApi/Prescription/")]
     public class AppPrescriptionController : Controller
     {
-        AppPrescription_BLL _bll = new AppPrescription_BLL();
+        private AppPrescription_BLL _bll;
+
+        public AppPrescriptionController(IConfiguration configuration)
+        {
+            string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
+            _bll = new AppPrescription_BLL(connectionString);
+        }
+
+
 
 
         [HttpGet]

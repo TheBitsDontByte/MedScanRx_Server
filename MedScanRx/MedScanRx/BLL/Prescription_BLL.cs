@@ -11,7 +11,12 @@ namespace MedScanRx.BLL
 {
     public class Prescription_BLL
     {
-        Prescription_DAL _dal = new Prescription_DAL();
+        Prescription_DAL _dal;
+
+        public Prescription_BLL(string connectionString)
+        {
+            _dal = new Prescription_DAL(connectionString);
+        }
 
 		public async Task<string> SearchOpenFda(OpenFdaSearch_Model model)
         {

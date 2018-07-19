@@ -25,6 +25,8 @@ namespace MedScanRx
         {
             services.AddCors();
 
+            services.AddSingleton<IConfiguration>(Configuration);
+
             services.AddMvc();
 
         }

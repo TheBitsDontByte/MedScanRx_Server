@@ -11,9 +11,14 @@ namespace MedScanRx.DAL
 {
     public class Patient_DAL
     {
-        //Grab this from appsettings.json instead of here
+        private static SqlConnection cn;
 
-        private static SqlConnection cn = new SqlConnection("Server=DESKTOP-CLVNC1I;Database=MedScanRx;User Id=admin;Password=admin");
+        public Patient_DAL(string connectionString)
+        {
+            cn = new SqlConnection(connectionString);
+        }
+
+       // = new SqlConnection("Server=DESKTOP-CLVNC1I;Database=MedScanRx;User Id=admin;Password=admin");
 
         public async Task<List<Patient_Model>> GetAllPatients()
         {

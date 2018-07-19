@@ -7,7 +7,12 @@ namespace MedScanRx.BLL
 {
     public class Patient_BLL
     {
-        private static Patient_DAL _dal = new Patient_DAL();
+        private static Patient_DAL _dal;
+
+        public Patient_BLL(string connectionString)
+        {
+            _dal = new Patient_DAL(connectionString);
+        }
 
         public async Task<List<Patient_Model>> GetAllPatients()
         {

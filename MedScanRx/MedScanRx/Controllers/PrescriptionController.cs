@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MedScanRx.BLL;
 using MedScanRx.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.Controllers
 {
@@ -11,7 +12,13 @@ namespace MedScanRx.Controllers
     [Route("api/Prescription/")]
     public class PrescriptionController : Controller
     {
-        Prescription_BLL _bll = new Prescription_BLL();
+        Prescription_BLL _bll;
+
+        public PrescriptionController (IConfiguration configuration)
+        {
+            string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
+            _bll = new Prescription_BLL(connectionString);
+        }
 
         [Route("SearchOpenfda")]
         public async Task<IActionResult> SearchOpenFda([FromBody] OpenFdaSearch_Model model)

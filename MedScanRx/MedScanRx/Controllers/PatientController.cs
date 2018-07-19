@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MedScanRx.BLL;
 using MedScanRx.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.Controllers
 {
@@ -12,7 +13,13 @@ namespace MedScanRx.Controllers
     [Route("api/Patient/")]
     public class PatientController : Controller
     {
-        public Patient_BLL _bll = new Patient_BLL();
+        public Patient_BLL _bll;
+
+        public PatientController(IConfiguration configuration)
+        {
+            string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
+            _bll = new Patient_BLL(connectionString);
+        }
 
 
         //NOT IN USE AND SET UP POORLY -- REDO BEFORE / IF USING

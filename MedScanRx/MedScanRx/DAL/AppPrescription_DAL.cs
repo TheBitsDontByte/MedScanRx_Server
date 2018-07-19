@@ -12,7 +12,12 @@ namespace MedScanRx.DAL
 {
     public class AppPrescription_DAL
     {
-        private static SqlConnection cn = new SqlConnection("Server=DESKTOP-CLVNC1I;Database=MedScanRx;User Id=admin;Password=admin");
+        private static SqlConnection cn;
+
+        public AppPrescription_DAL(string connectionString)
+        {
+            cn = new SqlConnection(connectionString);
+        }
 
         public async Task<List<Prescription_Model>> GetUpcomingAlerts(long patientId)
         {

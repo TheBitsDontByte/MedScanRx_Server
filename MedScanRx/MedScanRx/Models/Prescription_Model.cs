@@ -12,6 +12,7 @@ namespace MedScanRx.Models
         public string BrandName { get; set; }
         public string GenericName { get; set; }
         public string RximageMedicineName { get; set; }
+        public string PrescriptionName { get; set; }
         public string ImageUrl { get; set; }
         public string Rxcui { get; set; }
         public string Ndc { get; set; }
