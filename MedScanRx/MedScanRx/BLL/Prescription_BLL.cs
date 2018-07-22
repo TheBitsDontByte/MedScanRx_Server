@@ -79,7 +79,9 @@ namespace MedScanRx.BLL
         public async Task<bool> UpdatePrescription(Prescription_Model model)
         {
             var prescriptionSuccess = await _dal.UpdatePrescription(model).ConfigureAwait(false);
-            var alertSuccess = await _dal.UpdatePrescriptionAlerts(model).ConfigureAwait(false);
+            bool alertSuccess = true;
+            if (model.ScheduledAlerts != null)
+                alertSuccess = await _dal.UpdatePrescriptionAlerts(model).ConfigureAwait(false);
 
             return (alertSuccess && prescriptionSuccess);
             

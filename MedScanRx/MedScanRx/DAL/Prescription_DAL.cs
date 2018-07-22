@@ -29,12 +29,12 @@ namespace MedScanRx.DAL
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
                     CommandText = "INSERT INTO [dbo].[Prescription] " +
-                                        "([Ndc], [BrandName], [GenericName], [RximageMedicineName], PrescriptionName, [PatientId],[Color],[Dosage],[Identifier]," +
+                                        "([Ndc], PrescriptionName, [PatientId],[Color],[Dosage],[Identifier]," +
                                         "[Shape], [Rxcui], [ImageUrl], [DoctorNote],[Warning],[OriginalNumberOfDoses],[CurrentNumberOfDoses]," +
                                         "[OriginalNumberOfRefills],[CurrentNumberOfRefills],[IsActive],[EnteredBy]," +
                                         "[EnteredDate],[ModifiedBy],[ModifiedDate])" +
                                         "OUTPUT inserted.PrescriptionId " +
-                                        "VALUES(@Ndc, @BrandName, @GenericName, @RximageMedicineName, @PrescriptionName, @PatientId, @Color, @Dosage, @Identifier, " +
+                                        "VALUES(@Ndc, @PrescriptionName, @PatientId, @Color, @Dosage, @Identifier, " +
                                         "@Shape, @Rxcui, @ImageUrl, @DoctorNote, @Warning, @OriginalNumberOfDoses, @CurrentNumberOfDoses, @OriginalNumberOfRefills, " +
                                         "@CurrentNumberOfRefills, @IsActive, @EnteredBy, @EnteredDate, @ModifiedBy, @ModifiedDate)"
                 };
@@ -42,9 +42,6 @@ namespace MedScanRx.DAL
                 DateTime now = DateTime.Now;
 
                 cmd.Parameters.AddWithValue("@Ndc", model.Ndc);
-                cmd.Parameters.AddWithValue("@BrandName", model.BrandName);
-                cmd.Parameters.AddWithValue("@GenericName", model.GenericName);
-                cmd.Parameters.AddWithValue("@RximageMedicineName", model.RximageMedicineName ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@PrescriptionName", model.PrescriptionName);
                 cmd.Parameters.AddWithValue("@PatientId", model.PatientId);
                 cmd.Parameters.AddWithValue("@Color", model.Color);
@@ -132,10 +129,10 @@ namespace MedScanRx.DAL
                     CommandText = " SELECT  p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
                                     " join PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
                                     " where p.PatientId = @patientId and p.IsActive = 1 and pa.IsActive = 1" +
-                                    " group by p.PrescriptionId,Ndc,BrandName,GenericName, RximageMedicineName, PrescriptionName, " +
-                                    " PatientId,Color,Dosage,Identifier,Shape, Rxcui, ImageUrl, DoctorNote, " +
-                                    " Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive," +
-                                    " EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
+                                    " group by p.PrescriptionId, Ndc, PrescriptionName, " +
+                                    " PatientId, Color, Dosage, Identifier, Shape, Rxcui, ImageUrl, DoctorNote, " +
+                                    " Warning, OriginalNumberOfDoses, CurrentNumberOfDoses, OriginalNumberOfRefills, CurrentNumberOfRefills, p.IsActive," +
+                                    " EnteredBy, EnteredDate, ModifiedBy, ModifiedDate"
                 };
 
                 cmd.Parameters.AddWithValue("@patientId", patientId);
@@ -241,35 +238,25 @@ namespace MedScanRx.DAL
                 {
                     CommandType = System.Data.CommandType.Text,
                     Connection = cn,
-                    CommandText = "UPDATE Prescription SET Ndc = @Ndc, BrandName = @BrandName, GenericName = @GenericName, RximageMedicineName " +
-                                    " PatientId = @PatientId,  Color = @Color, RximageMedicineName = @RximageMedicineName, PrescriptionName = @PrescriptionName" +
-                                    "Dosage = @Dosage, Identifier = @Identifier, Shape = @Shape, DoctorNote = @DoctorNote, Warning = @Warning, CurrentNumberOfDoses = @CurrentNumberOfDoses, " +
-                                    "CurrentNumberOfRefills = @CurrentNumberOfRefills, IsActive = @IsActive, ModifiedBy = @ModifiedBy, ModifiedDate = @ModifiedDate " +
+                    CommandText = "UPDATE Prescription SET PrescriptionName = @PrescriptionName,  Color = @Color," +
+                                    " Dosage = @Dosage, Identifier = @Identifier, Shape = @Shape, DoctorNote = @DoctorNote," +
+                                    " Warning = @Warning, CurrentNumberOfDoses = @CurrentNumberOfDoses, CurrentNumberOfRefills = @CurrentNumberOfRefills," +
+                                    " ModifiedBy = @ModifiedBy, ModifiedDate = @ModifiedDate " +
                                     " where PrescriptionId = @PrescriptionId"
                 };
-
-                cmd.Parameters.AddWithValue("@Ndc", model.Ndc);
-                cmd.Parameters.AddWithValue("@BrandName", model.BrandName);
-                cmd.Parameters.AddWithValue("@GenericName", model.GenericName);
-                cmd.Parameters.AddWithValue("@RximageMedicineName", model.RximageMedicineName ?? (object)DBNull.Value);
+                
                 cmd.Parameters.AddWithValue("@PrescriptionName", model.PrescriptionName);
-                cmd.Parameters.AddWithValue("@PatientId", model.PatientId);
                 cmd.Parameters.AddWithValue("@Color", model.Color);
                 cmd.Parameters.AddWithValue("@Dosage", model.Dosage);
                 cmd.Parameters.AddWithValue("@Identifier", model.Identifiers);
                 cmd.Parameters.AddWithValue("@Shape", model.Shape);
-                cmd.Parameters.AddWithValue("@RximageMedicineName", model.RximageMedicineName ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@Rxcui", model.Rxcui ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@ImageUrl", model.ImageUrl ?? (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@DoctorNote", model.DoctorNotes);
                 cmd.Parameters.AddWithValue("@Warning", model.Warnings);
                 cmd.Parameters.AddWithValue("@CurrentNumberOfDoses", model.CurrentNumberOfDoses);
                 cmd.Parameters.AddWithValue("@CurrentNumberOfRefills", model.CurrentNumberOfRefills);
-                cmd.Parameters.AddWithValue("@IsActive", 1); //TODO handle this
                 cmd.Parameters.AddWithValue("@ModifiedBy", "Where to get this user");
                 cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.Now);
                 cmd.Parameters.AddWithValue("@PrescriptionId", model.PrescriptionId);
-
 
                 await cn.OpenAsync().ConfigureAwait(false);
                 return await cmd.ExecuteNonQueryAsync().ConfigureAwait(false) == 1;
@@ -294,15 +281,14 @@ namespace MedScanRx.DAL
                     CommandType = System.Data.CommandType.Text,
                     Connection = cn,
                     CommandText =
-                    "DELETE FROM PrescriptionAlert where PrescriptionId = @PrescriptionId AND AlertDateTime > GETDATE()"
+                    "DELETE FROM PrescriptionAlert where PrescriptionId = @PrescriptionId AND IsActive = 1"
                 };
 
                 cmd.Parameters.AddWithValue("@PrescriptionId", model.PrescriptionId);
                 await cn.OpenAsync().ConfigureAwait(false);
+                //Just delete all upcoming ones, nothing to really check against ?
+                await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
 
-                var rowsDeleted = await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-                if (rowsDeleted != model.ScheduledAlerts.Count)
-                    throw new InvalidOperationException("Incorrect number of rows deleted");
 
                 cmd.CommandText = "INSERT INTO PrescriptionAlert (PrescriptionId, AlertDateTime, IsActive) VALUES ";
                 for (int i = 0; i < model.ScheduledAlerts.Count; i++)
