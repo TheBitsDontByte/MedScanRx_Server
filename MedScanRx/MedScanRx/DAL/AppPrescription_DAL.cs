@@ -145,9 +145,9 @@ namespace MedScanRx.DAL
             }
         }
 
-        public async Task<List<string>> GetPrescriptionAlerts(int prescriptionId)
+        public async Task<List<PrescriptionAlert_Model>> GetPrescriptionAlerts(int prescriptionId)
         {
-            List<string> alerts = new List<string>();
+            List<PrescriptionAlert_Model> alerts = new List<PrescriptionAlert_Model>();
 
             try
             {

@@ -25,6 +25,6 @@ namespace MedScanRx.Models
         public string OriginalNumberOfRefills { get; set; }
         public string CurrentNumberOfRefills { get; set; }
         public string IsActive { get; set; }
-        public List<string> ScheduledAlerts { get; set; }
+        public List<PrescriptionAlert_Model> ScheduledAlerts { get; set; }
     }
 }

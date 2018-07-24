@@ -95,7 +95,7 @@ namespace MedScanRx.DAL
                 for (int i = 0; i < model.ScheduledAlerts.Count; i++)
                 {
                     cmdString += $"(@PrescriptionId, @ScheduledAlert{i}, @IsActive),";
-                    cmd.Parameters.AddWithValue($"@ScheduledAlert{i}", model.ScheduledAlerts.ElementAt(i));
+                    cmd.Parameters.AddWithValue($"@ScheduledAlert{i}", model.ScheduledAlerts[i].AlertDateTime);
                 }
                 cmd.CommandText = cmdString.Remove(cmdString.LastIndexOf(","), 1);
 
@@ -194,9 +194,9 @@ namespace MedScanRx.DAL
             }
         }
 
-        public async Task<List<string>> GetPrescriptionAlerts(int prescriptionId)
+        public async Task<List<PrescriptionAlert_Model>> GetPrescriptionAlerts(int prescriptionId)
         {
-            List<string> alerts = new List<string>();
+            List<PrescriptionAlert_Model> alerts = new List<PrescriptionAlert_Model>();
 
             try
             {
@@ -204,7 +204,7 @@ namespace MedScanRx.DAL
                 {
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
-                    CommandText = $"SELECT AlertDateTime FROM PrescriptionAlert WHERE PrescriptionId = @prescriptionId"
+                    CommandText = $"SELECT AlertDateTime, TakenDateTime, IsActive FROM PrescriptionAlert WHERE PrescriptionId = @prescriptionId"
                 };
                 cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
 
@@ -325,7 +325,7 @@ namespace MedScanRx.DAL
                     CommandType = System.Data.CommandType.Text,
                     Connection = cn,
                     CommandText =
-                        "UPDATE PrescriptionAlert SET IsActive = @IsActive  WHERE PrescriptionId = @PrescriptionId AND AlertDateTime > GETDATE() AND IsActive = 1; " +
+                        "UPDATE PrescriptionAlert SET IsActive = @IsActive  WHERE PrescriptionId = @PrescriptionId AND IsActive = 1; " +
                         "UPDATE Prescription SET IsActive = @IsActive, ModifiedBy = @ModifiedBy, ModifiedDate = @ModifiedDate WHERE PatientId = @PatientId AND PrescriptionId = @PrescriptionId AND IsActive = 1; "
                 };
 
