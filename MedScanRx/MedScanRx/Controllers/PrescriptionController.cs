@@ -14,7 +14,7 @@ namespace MedScanRx.Controllers
     {
         Prescription_BLL _bll;
 
-        public PrescriptionController (IConfiguration configuration)
+        public PrescriptionController(IConfiguration configuration)
         {
             string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
             _bll = new Prescription_BLL(connectionString);
@@ -82,10 +82,11 @@ namespace MedScanRx.Controllers
                 if (result)
                     return Ok();
 
-                return BadRequest();
-            } catch (Exception ex)
+                return BadRequest(new { errors = "Unable to save the prescription, please try again" });
+            }
+            catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { errors = ex.Message });
             }
 
         }
@@ -101,7 +102,7 @@ namespace MedScanRx.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { errors = ex.Message });
             }
         }
 
@@ -115,7 +116,7 @@ namespace MedScanRx.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Something went wrong getting the prescription details");
+                return StatusCode(500, new { errors = "Something went wrong getting the prescription details" });
             }
         }
 
@@ -129,12 +130,12 @@ namespace MedScanRx.Controllers
                 if (result)
                     return Ok();
 
-                return BadRequest();
+                return BadRequest(new { errors = "Unable to update the prescription, please try again" });
 
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Something went wrong updating the prescription details");
+                return StatusCode(500, new { errors = "Something went wrong updating the prescription details" });
             }
         }
 
@@ -148,9 +149,10 @@ namespace MedScanRx.Controllers
                 if (success)
                     return Ok();
 
-                return BadRequest();
+                return BadRequest(new { errors = "Unable to delete the prescription, please try again" });
 
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, "Something went wrong deleting the prescription");
             }

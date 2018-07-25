@@ -68,7 +68,7 @@ namespace MedScanRx.DAL
             }
             catch (Exception ex)
             {
-                throw new DatabaseException("Something went wrong saving the patient", ex);
+                throw new DatabaseException("Something went wrong saving the prescription", ex);
             }
             finally
             {
@@ -294,7 +294,7 @@ namespace MedScanRx.DAL
                 for (int i = 0; i < model.ScheduledAlerts.Count; i++)
                 {
                     cmd.CommandText += $" (@PrescriptionId, @AlertDateTime{i}, @IsActive), ";
-                    cmd.Parameters.AddWithValue($"@AlertDateTime{i}", model.ScheduledAlerts.ElementAt(i));
+                    cmd.Parameters.AddWithValue($"@AlertDateTime{i}", model.ScheduledAlerts[i].AlertDateTime);
                 }
                 cmd.Parameters.AddWithValue("@IsActive", 1);
 
