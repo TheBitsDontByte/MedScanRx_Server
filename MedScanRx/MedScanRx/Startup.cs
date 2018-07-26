@@ -42,10 +42,12 @@ namespace MedScanRx
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                ForwardedHeaders= ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            app.UseCors(builder => builder.WithOrigins("http://localhost:3000"));
+            app.UseCors(builder => builder.WithOrigins(new string[] { "http://localhost:3000",
+                "http://medscanrxtesting.s3-website-us-west-1.amazonaws.com" }
+            ));
 
             app.UseMvc();
         }
