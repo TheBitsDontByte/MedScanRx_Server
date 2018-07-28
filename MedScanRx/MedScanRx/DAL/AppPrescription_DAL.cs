@@ -32,7 +32,7 @@ namespace MedScanRx.DAL
                     CommandText = "SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
                                     "JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
                                     "WHERE pa.AlertDateTime BETWEEN GETDATE() AND DATEADD(HOUR, 1, GETDATE()) AND p.PatientId = @PatientId AND pa.IsActive = 1 AND p.IsActive = 1 " +
-                                    "group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Color,Dosage,Identifier,Shape,DoctorNote, " +
+                                    "group by p.PrescriptionId,Ndc,PrescriptionName,PatientId,Color,Dosage,Identifier,Shape,Rxcui,ImageUrl,DoctorNote, " +
                                     "Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
                                     "EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
                 };
@@ -71,12 +71,12 @@ namespace MedScanRx.DAL
                 {
                     CommandType = System.Data.CommandType.Text,
                     Connection = cn,
-                    CommandText = "SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
-                                    "JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
-                                    "WHERE p.PatientId = @PatientId AND pa.IsActive = 1 AND p.IsActive = 1 " +
-                                    "group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Color,Dosage,Identifier,Shape,DoctorNote, " +
-                                    "Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
-                                    "EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
+                    CommandText = " SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
+                                    " JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
+                                    " WHERE p.PatientId = @PatientId AND pa.IsActive = 1 AND p.IsActive = 1 " +
+                                    " group by p.PrescriptionId,Ndc,PrescriptionName,PatientId,Color,Dosage,Identifier,Shape,Rxcui,ImageUrl,DoctorNote, " +
+                                    " Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
+                                    " EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
                 };
 
                 cmd.Parameters.AddWithValue("@patientId", patientId);
@@ -113,20 +113,19 @@ namespace MedScanRx.DAL
                 {
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
-                    CommandText = "SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
-                                    "JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
-                                    "WHERE p.PrescriptionId = @prescriptionId AND pa.IsActive = 1 AND p.IsActive = 1 " +
-                                    "group by p.PrescriptionId,Ndc,BrandName,GenericName,PatientId,Color,Dosage,Identifier,Shape,DoctorNote, " +
-                                    "Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
-                                    "EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
+                    CommandText = " SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
+                                    " JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
+                                    " WHERE p.PrescriptionId = @PrescriptionId AND pa.IsActive = 1 AND p.IsActive = 1 " +
+                                    " group by p.PrescriptionId,Ndc,PrescriptionName,PatientId,Color,Dosage,Identifier,Shape,Rxcui,ImageUrl,DoctorNote, " +
+                                    " Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
+                                    " EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
 
                 };
-                cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
+                cmd.Parameters.AddWithValue("@PrescriptionId", prescriptionId);
 
                 await cn.OpenAsync().ConfigureAwait(false);
                 using (var reader = cmd.ExecuteReader())
                 {
-                    //TODO CLEAN THIS WHOLE THING UP I HAD BEEN FORGETTING TO INCLUDE THE NEXT ALERT
                     if (reader.Read())
                     {
                         model = DataRowToAllPrescriptionsMapper.Map(reader);
@@ -155,7 +154,7 @@ namespace MedScanRx.DAL
                 {
                     Connection = cn,
                     CommandType = System.Data.CommandType.Text,
-                    CommandText = $"SELECT AlertDateTime FROM PrescriptionAlert WHERE PrescriptionId = @prescriptionId"
+                    CommandText = $"SELECT AlertDateTime, IsActive, TakenDateTime FROM PrescriptionAlert WHERE PrescriptionId = @prescriptionId"
                 };
                 cmd.Parameters.AddWithValue("@prescriptionId", prescriptionId);
 

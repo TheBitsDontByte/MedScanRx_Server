@@ -14,14 +14,12 @@ namespace MedScanRx.DAL.Mapper
         {
             try
             {
-                bool couldParse = DateTime.TryParse(reader["TakenDateTime"].ToString(), out DateTime takenDateTime);
-
                 var prescriptionAlert = new PrescriptionAlert_Model
                 {
                     AlertDateTime = DateTime.Parse(reader["AlertDateTime"].ToString()),
-                    IsActive = bool.Parse(reader["IsActive"].ToString())
+                    IsActive = bool.Parse(reader["IsActive"].ToString()),
                 };
-
+                bool couldParse = DateTime.TryParse(reader["TakenDateTime"].ToString(), out DateTime takenDateTime);
                 if (couldParse)
                     prescriptionAlert.TakenDateTime = takenDateTime;
                 

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 namespace MedScanRx.Controllers
 {
     [Produces("application/json")]
-    [Route("AppApi/Prescription/")]
+    [Route("Api/App/Prescription/")]
     public class AppPrescriptionController : Controller
     {
         private AppPrescription_BLL _bll;
@@ -29,7 +29,7 @@ namespace MedScanRx.Controllers
         public async Task<IActionResult> UpcomingAlerts(long patientId)
         {
             try
-            {
+                {
                 var allUpcomingPrescriptions = await _bll.GetUpcomingAlerts(patientId).ConfigureAwait(false);
                 return Ok(allUpcomingPrescriptions);
             }
