@@ -6,16 +6,18 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using MedScanRx.DAL;
 using MedScanRx.Models;
+using MedScanRx.BLL.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.BLL
 {
-    public class Prescription_BLL
+    public class Prescription_BLL : IPrescription_BLL
     {
         Prescription_DAL _dal;
 
-        public Prescription_BLL(string connectionString)
+        public Prescription_BLL(IConfiguration configuration)
         {
-            _dal = new Prescription_DAL(connectionString);
+            _dal = new Prescription_DAL(configuration);
         }
 
 		public async Task<string> SearchOpenFda(OpenFdaSearch_Model model)
@@ -90,6 +92,11 @@ namespace MedScanRx.BLL
         public async Task<bool> DeletePrescriptionAndAlerts(long patientId, int prescriptionId)
         {
             return await _dal.DeletePrescriptionAndAlerts(patientId, prescriptionId).ConfigureAwait(false);
+        }
+
+        public async Task DeactivatePastAlerts()
+        {
+            _dal.DeactivatePastAlerts();
         }
 
         private string c3piUrlBuilder(OpenFdaSearch_Model search)

@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Hosting;
+using MedScanRx.BLL;
+using MedScanRx.BLL.Interfaces;
 
 namespace MedScanRx
 {
@@ -27,6 +30,8 @@ namespace MedScanRx
             services.AddCors();
 
             services.AddSingleton(Configuration);
+            services.AddSingleton<DeactivatePastAlerts>();
+            services.AddSingleton<IHostedService, ScheduledService>();
 
             services.AddMvc();
 
@@ -47,7 +52,9 @@ namespace MedScanRx
 
             app.UseCors(builder => builder.WithOrigins(new string[] { "http://localhost:3000",
                 "http://medscanrxtesting.s3-website-us-west-1.amazonaws.com" }
-            ));
+                )
+                .AllowAnyMethod()
+                .AllowAnyHeader());
 
             app.UseMvc();
         }
