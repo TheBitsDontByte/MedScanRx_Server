@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using MedScanRx.BLL;
 using MedScanRx.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,16 +19,74 @@ namespace MedScanRx.Controllers
     [Route("api/Auth/")]
     public class AuthController : Controller
     {
-        IConfiguration _configuration;
+        private IConfiguration _configuration;
 
+        Auth_BLL _bll;
         public AuthController(IConfiguration configuration)
         {
             _configuration = configuration;
+            _bll = new Auth_BLL(configuration.GetConnectionString("MedScanRx_AWS"));
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("Admin/Login")]
+        public IActionResult Admin([FromBody] LoginRequest loginRequest)
+        {
+            try
+            {
+                if (_bll.AuthenticateAdmin(loginRequest))
+                {
+
+                    var claims = new[]
+                    {
+                        new Claim(ClaimTypes.Name, loginRequest.UserName),
+                        new Claim("userName", loginRequest.UserName),
+                        new Claim(ClaimTypes.Role, "MedScanRx_Admin")
+                    };
+
+                    return Ok(new { token = CreateToken(claims) });
+                }
+
+                return Unauthorized();
+            }
+            catch
+            {
+                return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("Patient/Login")]
+        public IActionResult Patient([FromBody] LoginRequest loginRequest)
+        {
+            try
+            {
+                if (_bll.AuthenticateAdmin(loginRequest))
+                {
+
+                    var claims = new[]
+                    {
+                        new Claim(ClaimTypes.Name, loginRequest.UserName),
+                        new Claim(ClaimTypes.Role, "MedScanRx_Patient")
+                    };
+
+                    return Ok(new { token = CreateToken(claims) });
+                }
+
+                return Unauthorized();
+            }
+            catch
+            {
+                return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
+            }
         }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("Token")]
+        //DONT USE
         public IActionResult Token([FromBody]LoginRequest request)
         {
             if (request.UserName == "Chris" && request.Password == "wow")
@@ -45,7 +104,7 @@ namespace MedScanRx.Controllers
                     issuer: "medscanrx.com",
                     audience: "medscanrx.com",
                     claims: claims,
-                    expires: DateTime.Now.AddMinutes(30),
+                    expires: DateTime.UtcNow.AddMinutes(30),
                     signingCredentials: creds);
 
                 return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
@@ -54,21 +113,27 @@ namespace MedScanRx.Controllers
             return BadRequest(new { error = "Invalid login request" });
         }
 
-        [Authorize]
-        [HttpGet]
-        [Route("TestAuth")]
-        public IActionResult TestAuth()
+        [Authorize(Roles = "MedScanRx_Admin, MedScanRX_Patient")]
+        [Route("Test")]
+        public IActionResult test()
         {
-            return Ok("Testing this is authorized");
+            return Ok();
         }
 
-        [Authorize(Policy = "Admin")]
-        [HttpGet]
-        [Route("TestAdmin")]
-        public IActionResult TestAdmin()
+        private string CreateToken(Claim[] claims)
         {
-            var x = this;
-            return Ok("Testing this is authorized");
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecurityKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: "medscanrx.com",
+                audience: "medscanrx.com",
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
     }

@@ -3,12 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using MedScanRx.BLL;
 using MedScanRx.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.Controllers
 {
-
+    [Authorize(Roles = "MedScanRx_Admin")]
     [Produces("application/json")]
     [Route("api/Patient/")]
     public class PatientController : Controller
