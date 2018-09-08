@@ -5,6 +5,8 @@ using MedScanRx.BLL;
 using MedScanRx.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using MedScanRx.BLL.Interfaces;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MedScanRx.Controllers
@@ -14,12 +16,13 @@ namespace MedScanRx.Controllers
     [Route("api/Prescription/")]
     public class PrescriptionController : Controller
     {
-        Prescription_BLL _bll;
+        IPrescription_BLL _bll;
+        private readonly DeactivatePastAlerts _deactivatePastAlerts;
 
-        public PrescriptionController(IConfiguration configuration)
+        public PrescriptionController(IConfiguration configuration, DeactivatePastAlerts deactivatePastAlerts)
         {
-            string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
-            _bll = new Prescription_BLL(connectionString);
+            _bll = new Prescription_BLL(configuration);
+            _deactivatePastAlerts = deactivatePastAlerts;
         }
 
         [Route("SearchOpenfda")]

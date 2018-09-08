@@ -31,13 +31,15 @@ namespace MedScanRx.DAL
                     Connection = cn,
                     CommandText = "SELECT p.*, min(pa.AlertDateTime) as NextAlert FROM Prescription p " +
                                     "JOIN PrescriptionAlert pa on pa.PrescriptionId = p.PrescriptionId " +
-                                    "WHERE pa.AlertDateTime BETWEEN GETDATE() AND DATEADD(HOUR, 1, GETDATE()) AND p.PatientId = @PatientId AND pa.IsActive = 1 AND p.IsActive = 1 " +
+                                    "WHERE pa.AlertDateTime BETWEEN @Now AND @InOneHour AND p.PatientId = @PatientId AND pa.IsActive = 1 AND p.IsActive = 1 " +
                                     "group by p.PrescriptionId,Ndc,PrescriptionName,PatientId,Color,Dosage,Identifier,Shape,Rxcui,ImageUrl,DoctorNote, " +
                                     "Warning,OriginalNumberOfDoses,CurrentNumberOfDoses,OriginalNumberOfRefills,CurrentNumberOfRefills,p.IsActive, " +
                                     "EnteredBy,EnteredDate,ModifiedBy,ModifiedDate"
                 };
 
                 cmd.Parameters.AddWithValue("@patientId", patientId);
+                cmd.Parameters.AddWithValue("@Now", DateTime.Now);
+                cmd.Parameters.AddWithValue("@InOneHour", DateTime.Now.AddMinutes(59));
 
                 await cn.OpenAsync().ConfigureAwait(false);
                 using (var reader = cmd.ExecuteReader())

@@ -8,6 +8,7 @@ using MedScanRx.Exceptions;
 using System.Collections.Generic;
 using MedScanRx.DAL.Mapper;
 using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.DAL
 {
@@ -15,9 +16,9 @@ namespace MedScanRx.DAL
     {
         private static SqlConnection cn;
 
-        public Prescription_DAL(string connectionString)
+        public Prescription_DAL(IConfiguration configuration)
         {
-            cn = new SqlConnection(connectionString);
+            cn = new SqlConnection(configuration.GetConnectionString("MedScanRx_AWS"));
         }
 
         public async Task<int> SavePrescription(Prescription_Model model)
@@ -69,6 +70,38 @@ namespace MedScanRx.DAL
             catch (Exception ex)
             {
                 throw new DatabaseException("Something went wrong saving the prescription", ex);
+            }
+            finally
+            {
+                cn.Close();
+            }
+        }
+
+        internal async Task DeactivatePastAlerts()
+        {
+            try
+            {
+                //SqlCommand cmd = new SqlCommand
+                //{
+                //    CommandType = System.Data.CommandType.StoredProcedure,
+                //    Connection = cn,
+                //    CommandText = "sp_deactivate_past_alerts"
+
+                //};
+                SqlCommand cmd = new SqlCommand
+                {
+                    CommandType = System.Data.CommandType.Text,
+                    Connection = cn,
+                    CommandText = "update prescriptionalert set isactive = 1"
+                };
+
+                await cn.OpenAsync().ConfigureAwait(false);
+                cmd.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseException(ex.Message);
             }
             finally
             {
@@ -244,7 +277,7 @@ namespace MedScanRx.DAL
                                     " ModifiedBy = @ModifiedBy, ModifiedDate = @ModifiedDate " +
                                     " where PrescriptionId = @PrescriptionId"
                 };
-                
+
                 cmd.Parameters.AddWithValue("@PrescriptionName", model.PrescriptionName);
                 cmd.Parameters.AddWithValue("@Color", model.Color);
                 cmd.Parameters.AddWithValue("@Dosage", model.Dosage);
@@ -340,10 +373,12 @@ namespace MedScanRx.DAL
 
                 return true;
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new DatabaseException("Something went wrong deleting the prescription", ex);
-            } finally
+            }
+            finally
             {
                 cn.Close();
             }
