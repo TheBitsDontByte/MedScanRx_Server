@@ -15,126 +15,132 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MedScanRx.Controllers
 {
-    [Produces("application/json")]
-    [Route("api/Auth/")]
-    public class AuthController : Controller
-    {
-        private IConfiguration _configuration;
+	[Produces("application/json")]
+	[Route("api/Auth/")]
+	public class AuthController : Controller
+	{
+		private IConfiguration _configuration;
 
-        Auth_BLL _bll;
-        public AuthController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-            _bll = new Auth_BLL(configuration.GetConnectionString("MedScanRx_AWS"));
-        }
+		private const string UserNameClaim = "userName";
+		private const string PatientIdClaim = "patientId";
 
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("Admin/Login")]
-        public IActionResult Admin([FromBody] LoginRequest loginRequest)
-        {
-            try
-            {
-                if (_bll.AuthenticateAdmin(loginRequest))
-                {
+		Auth_BLL _bll;
+		public AuthController(IConfiguration configuration)
+		{
+			_configuration = configuration;
+			_bll = new Auth_BLL(configuration.GetConnectionString("MedScanRx_AWS"));
+		}
 
-                    var claims = new[]
-                    {
-                        new Claim(ClaimTypes.Name, loginRequest.UserName),
-                        new Claim("userName", loginRequest.UserName),
-                        new Claim(ClaimTypes.Role, "MedScanRx_Admin")
-                    };
+		[HttpPost]
+		[AllowAnonymous]
+		[Route("Admin/Login")]
+		public IActionResult Admin([FromBody] LoginRequest loginRequest)
+		{
+			try
+			{
+				if (_bll.AuthenticateAdmin(loginRequest))
+				{
 
-                    return Ok(new { token = CreateToken(claims) });
-                }
+					var claims = new[]
+					{
+							new Claim(ClaimTypes.Name, loginRequest.UserName),
+							new Claim(UserNameClaim, loginRequest.UserName),
+							new Claim(ClaimTypes.Role, "MedScanRx_Admin")
+					};
 
-                return Unauthorized();
-            }
-            catch
-            {
-                return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
-            }
-        }
+					return Ok(new { token = CreateToken(claims, DateTime.Now.AddMinutes(90)) });
+				}
 
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("Patient/Login")]
-        public IActionResult Patient([FromBody] LoginRequest loginRequest)
-        {
-            try
-            {
-                if (_bll.AuthenticateAdmin(loginRequest))
-                {
+				return Unauthorized();
+			}
+			catch
+			{
+				return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
+			}
+		}
 
-                    var claims = new[]
-                    {
-                        new Claim(ClaimTypes.Name, loginRequest.UserName),
-                        new Claim(ClaimTypes.Role, "MedScanRx_Patient")
-                    };
+		[HttpGet]
+		[Authorize(Roles = "MedScanRx_Patient")]
+		[Route("Patient/Refresh")]
+		public IActionResult RefreshToken(string fcmToken)
+		{
+			try
+			{
 
-                    return Ok(new { token = CreateToken(claims) });
-                }
+				_bll.UpdateFcmToken(fcmToken);
+				var patientId = this.User.Claims.First(c => c.Type == "patientId").Value;
+				var email = this.User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
 
-                return Unauthorized();
-            }
-            catch
-            {
-                return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
-            }
-        }
+				var claims = new[]
+				{
+					new Claim(ClaimTypes.Email, email),
+					new Claim(PatientIdClaim, patientId),
+					new Claim(ClaimTypes.Role, "MedScanRx_Patient")
+				};
 
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("Token")]
-        //DONT USE
-        public IActionResult Token([FromBody]LoginRequest request)
-        {
-            if (request.UserName == "Chris" && request.Password == "wow")
-            {
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, request.UserName),
-                    new Claim("AdminClaimTest", "")
-                };
+				return Ok(new { token = CreateToken(claims, DateTime.Now.AddDays(60)) });
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecurityKey"]));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, new { errorMessage = "Something went wrong refreshing authentication" });
 
-                var token = new JwtSecurityToken(
-                    issuer: "medscanrx.com",
-                    audience: "medscanrx.com",
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(30),
-                    signingCredentials: creds);
+			}
+		}
 
-                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
-            }
+		[HttpPost]
+		[AllowAnonymous]
+		[Route("Patient/Login")]
+		public IActionResult Patient([FromBody] LoginRequest loginRequest)
+		{
+			try
+			{
+				if (_bll.AuthenticatePatient(loginRequest))
+				{
+					_bll.UpdateFcmToken(loginRequest.FcmToken);
+					int patientId = _bll.GetPatientId(loginRequest);
+					var claims = new[]
+					{
+							new Claim(ClaimTypes.Email, loginRequest.UserName),
+							new Claim(PatientIdClaim, patientId.ToString()),
+							new Claim(ClaimTypes.Role, "MedScanRx_Patient")
+					};
 
-            return BadRequest(new { error = "Invalid login request" });
-        }
+					return Ok(new { token = CreateToken(claims, DateTime.Now.AddDays(60)) });
+				}
 
-        [Authorize(Roles = "MedScanRx_Admin, MedScanRX_Patient")]
-        [Route("Test")]
-        public IActionResult test()
-        {
-            return Ok();
-        }
+				return Unauthorized();
+			}
+			catch
+			{
+				return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
+			}
+		}
 
-        private string CreateToken(Claim[] claims)
-        {
+		[Authorize(Roles = "MedScanRx_Admin, MedScanRX_Patient")]
+		[Route("Test")]
+		public IActionResult test()
+		{
+			return Ok();
+		}
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecurityKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: "medscanrx.com",
-                audience: "medscanrx.com",
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: creds);
+		//Move this somewhere ? Seems weird for a controller
+		private string CreateToken(Claim[] claims, DateTime expirationTime)
+		{
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecurityKey"]));
+			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-    }
+			var token = new JwtSecurityToken(
+					issuer: "medscanrx.com",
+					audience: "medscanrx.com",
+					claims: claims,
+					expires: expirationTime,
+					signingCredentials: creds);
+
+			return new JwtSecurityTokenHandler().WriteToken(token);
+		}
+
+	}
 }

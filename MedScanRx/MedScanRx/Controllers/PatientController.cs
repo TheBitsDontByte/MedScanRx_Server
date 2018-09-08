@@ -15,11 +15,13 @@ namespace MedScanRx.Controllers
     public class PatientController : Controller
     {
         public Patient_BLL _bll;
+        public Auth_BLL _auth;
 
         public PatientController(IConfiguration configuration)
         {
             string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
             _bll = new Patient_BLL(connectionString);
+            _auth = new Auth_BLL(connectionString);
         }
 
 
@@ -59,8 +61,9 @@ namespace MedScanRx.Controllers
                     return BadRequest(new { errors = errors });
                 }
 
-                var success = await _bll.SavePatient(patient).ConfigureAwait(false);
-                if (success)
+                var patientAddedSuccess = await _bll.SavePatient(patient).ConfigureAwait(false);
+                bool patientAccountAddedSuccess = await _auth.AddPatient(patient).ConfigureAwait(false);
+                if (patientAddedSuccess && patientAccountAddedSuccess)
                     return Ok(patient);
 
                 return BadRequest(new { errors = "Unable to save the patient information, please try again" } );

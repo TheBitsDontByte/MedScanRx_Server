@@ -5,9 +5,11 @@ using MedScanRx.BLL;
 using MedScanRx.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MedScanRx.Controllers
 {
+    [Authorize(Roles = "MedScanRx_Admin")]
     [Produces("application/json")]
     [Route("api/Prescription/")]
     public class PrescriptionController : Controller

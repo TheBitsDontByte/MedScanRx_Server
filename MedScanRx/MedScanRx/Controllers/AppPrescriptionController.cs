@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using MedScanRx.BLL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.Controllers
 {
+    [Authorize(Roles = "MedScanRx_Patient")]
     [Produces("application/json")]
     [Route("Api/App/Prescription/")]
     public class AppPrescriptionController : Controller
@@ -20,9 +23,6 @@ namespace MedScanRx.Controllers
             string connectionString = configuration.GetConnectionString("MedScanRx_AWS");
             _bll = new AppPrescription_BLL(connectionString);
         }
-
-
-
 
         [HttpGet]
         [Route("UpcomingAlerts/{patientId}")]
@@ -44,6 +44,7 @@ namespace MedScanRx.Controllers
         [Route("AllPrescriptions/{patientId}")]
         public async Task<IActionResult> AllPrescriptions(long patientId)
         {
+            var x = this.User.Claims.First(c => c.Type == "patientId");
             try
             {
                 var allPrescriptions = await _bll.GetAllPrescriptions(patientId).ConfigureAwait(false);
