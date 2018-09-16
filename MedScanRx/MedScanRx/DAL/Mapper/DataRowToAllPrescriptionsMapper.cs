@@ -30,7 +30,7 @@ namespace MedScanRx.DAL.Mapper
                     PrescriptionId = (int)reader["PrescriptionId"],
                     Shape = reader["Shape"].ToString(),
                     Warnings = reader["Warning"].ToString(),
-                    NextAlert = reader["NextAlert"].ToString()
+                    NextAlert = DateTime.Parse(reader["NextAlert"].ToString())
                 };
             }
 

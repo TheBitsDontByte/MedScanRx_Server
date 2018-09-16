@@ -38,8 +38,8 @@ namespace MedScanRx.DAL
                 };
 
                 cmd.Parameters.AddWithValue("@patientId", patientId);
-                cmd.Parameters.AddWithValue("@Now", DateTime.Now);
-                cmd.Parameters.AddWithValue("@InOneHour", DateTime.Now.AddMinutes(59));
+                cmd.Parameters.AddWithValue("@Now", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@InOneHour", DateTime.UtcNow.AddMinutes(59));
 
                 await cn.OpenAsync().ConfigureAwait(false);
                 using (var reader = cmd.ExecuteReader())

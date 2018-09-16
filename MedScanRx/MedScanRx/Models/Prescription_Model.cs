@@ -13,7 +13,7 @@ namespace MedScanRx.Models
         public string ImageUrl { get; set; }
         public string Rxcui { get; set; }
         public string Ndc { get; set; }
-        public string NextAlert { get; set; }
+        public DateTime NextAlert { get; set; }
         public string Color { get; set; }
         public string Dosage { get; set; }
         public string Identifiers { get; set; }

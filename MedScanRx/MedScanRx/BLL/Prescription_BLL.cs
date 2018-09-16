@@ -11,125 +11,130 @@ using Microsoft.Extensions.Configuration;
 
 namespace MedScanRx.BLL
 {
-    public class Prescription_BLL : IPrescription_BLL
-    {
-        Prescription_DAL _dal;
+	public class Prescription_BLL : IPrescription_BLL
+	{
+		Prescription_DAL _dal;
 
-        public Prescription_BLL(IConfiguration configuration)
-        {
-            _dal = new Prescription_DAL(configuration);
-        }
+		public Prescription_BLL(IConfiguration configuration)
+		{
+			_dal = new Prescription_DAL(configuration);
+		}
+
+		public async Task<List<PatientMessaging_Model>> GetInitialMessageInfo()
+		{
+			return await _dal.GetInitialMessageInfo().ConfigureAwait(false);
+		}
 
 		public async Task<string> SearchOpenFda(OpenFdaSearch_Model model)
-        {
-            HttpClient client = new HttpClient();
-            //string url = c3piUrlBuilder(model);
-            string url = openfdaUrlBuilder(model);
-            HttpResponseMessage response = await client.GetAsync(url);
+		{
+			HttpClient client = new HttpClient();
+			//string url = c3piUrlBuilder(model);
+			string url = openfdaUrlBuilder(model);
+			HttpResponseMessage response = await client.GetAsync(url);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                return null;
+			if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+				return null;
 
-            return  await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        }
+			return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+		}
 
-        public async Task<string> SearchOpenFda(string rxcui)
-        {
-            HttpClient client = new HttpClient();
-            //string url = c3piUrlBuilder(model);
-            string url = $@"https://api.fda.gov/drug/label.json?search=openfda.rxcui:{rxcui}&limit=100";
-            HttpResponseMessage response = await client.GetAsync(url);
+		public async Task<string> SearchOpenFda(string rxcui)
+		{
+			HttpClient client = new HttpClient();
+			//string url = c3piUrlBuilder(model);
+			string url = $@"https://api.fda.gov/drug/label.json?search=openfda.rxcui:{rxcui}&limit=100";
+			HttpResponseMessage response = await client.GetAsync(url);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                return null;
+			if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+				return null;
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        }
+			return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+		}
 
-        public async Task<string> SearchRxcui(OpenFdaSearch_Model model)
-        {
-            HttpClient client = new HttpClient();
-            string url = c3piUrlBuilder(model);
-            
-            HttpResponseMessage response = await client.GetAsync(url);
-           
+		public async Task<string> SearchRxcui(OpenFdaSearch_Model model)
+		{
+			HttpClient client = new HttpClient();
+			string url = c3piUrlBuilder(model);
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        }
+			HttpResponseMessage response = await client.GetAsync(url);
 
 
-
-        public async Task<bool> SavePrescription(Prescription_Model model)
-        {
-            model.PrescriptionId = await _dal.SavePrescription(model).ConfigureAwait(false);
-            return await _dal.SavePrescriptionAlerts(model).ConfigureAwait(false);
-            
-        }
-
-        public async Task<List<Prescription_Model>> GetAllPrescriptions(long patientId)
-        {
-            return await _dal.GetAllPrescriptions(patientId).ConfigureAwait(false);
-        }
-
-        public async Task<Prescription_Model> GetPrescription(int prescriptionId)
-        {
-            var model = await _dal.GetPrescription(prescriptionId).ConfigureAwait(false);
-            model.ScheduledAlerts = await _dal.GetPrescriptionAlerts(prescriptionId).ConfigureAwait(false);
-            return model;
-        }
-
-        public async Task<bool> UpdatePrescription(Prescription_Model model)
-        {
-            var prescriptionSuccess = await _dal.UpdatePrescription(model).ConfigureAwait(false);
-            bool alertSuccess = true;
-            if (model.ScheduledAlerts != null)
-                alertSuccess = await _dal.UpdatePrescriptionAlerts(model).ConfigureAwait(false);
-
-            return (alertSuccess && prescriptionSuccess);
-            
-        }
-        
-        public async Task<bool> DeletePrescriptionAndAlerts(long patientId, int prescriptionId)
-        {
-            return await _dal.DeletePrescriptionAndAlerts(patientId, prescriptionId).ConfigureAwait(false);
-        }
-
-        public async Task DeactivatePastAlerts()
-        {
-            _dal.DeactivatePastAlerts();
-        }
-
-        private string c3piUrlBuilder(OpenFdaSearch_Model search)
-        {
-            string baseUrl = "https://rximage.nlm.nih.gov/api/rximage/1/rxnav?";
-            string builtUrl = baseUrl;
-
-            if (!string.IsNullOrEmpty(search.Name))
-                builtUrl += $"name={search.Name}&";
-            if (!string.IsNullOrEmpty(search.Ndc))
-                builtUrl += $"ndc={search.Ndc}";
-
-            return builtUrl;
-            
-        }
+			return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+		}
 
 
-        //Deprecated - but here as reference for what was before - no longer using openfda
-        private string openfdaUrlBuilder(OpenFdaSearch_Model search)
-        {
-            string baseUrl = @"https://api.fda.gov/drug/label.json?search=";
-            string builtUrl = baseUrl;
 
-            if (!string.IsNullOrEmpty(search.Name))
-                builtUrl += $"openfda.brand_name:\"{search.Name}\"+";
-            //if (!string.IsNullOrEmpty(search.GenericName))
-            //    builtUrl += $"openfda.generic_name:{search.GenericName}+";
-            if (!string.IsNullOrEmpty(search.Ndc))
-                builtUrl += $"openfda.package_ndc:\"{search.Ndc}\"+";
+		public async Task<bool> SavePrescription(Prescription_Model model)
+		{
+			model.PrescriptionId = await _dal.SavePrescription(model).ConfigureAwait(false);
+			return await _dal.SavePrescriptionAlerts(model).ConfigureAwait(false);
 
-            builtUrl += "&limit=30";
+		}
 
-            return builtUrl;
-        }
-    }
+		public async Task<List<Prescription_Model>> GetAllPrescriptions(long patientId)
+		{
+			return await _dal.GetAllPrescriptions(patientId).ConfigureAwait(false);
+		}
+
+		public async Task<Prescription_Model> GetPrescription(int prescriptionId)
+		{
+			var model = await _dal.GetPrescription(prescriptionId).ConfigureAwait(false);
+			model.ScheduledAlerts = await _dal.GetPrescriptionAlerts(prescriptionId).ConfigureAwait(false);
+			return model;
+		}
+
+		public async Task<bool> UpdatePrescription(Prescription_Model model)
+		{
+			var prescriptionSuccess = await _dal.UpdatePrescription(model).ConfigureAwait(false);
+			bool alertSuccess = true;
+			if (model.ScheduledAlerts != null)
+				alertSuccess = await _dal.UpdatePrescriptionAlerts(model).ConfigureAwait(false);
+
+			return (alertSuccess && prescriptionSuccess);
+
+		}
+
+		public async Task<bool> DeletePrescriptionAndAlerts(long patientId, int prescriptionId)
+		{
+			return await _dal.DeletePrescriptionAndAlerts(patientId, prescriptionId).ConfigureAwait(false);
+		}
+
+		public async Task DeactivatePastAlerts()
+		{
+			_dal.DeactivatePastAlerts();
+		}
+
+		private string c3piUrlBuilder(OpenFdaSearch_Model search)
+		{
+			string baseUrl = "https://rximage.nlm.nih.gov/api/rximage/1/rxnav?";
+			string builtUrl = baseUrl;
+
+			if (!string.IsNullOrEmpty(search.Name))
+				builtUrl += $"name={search.Name}&";
+			if (!string.IsNullOrEmpty(search.Ndc))
+				builtUrl += $"ndc={search.Ndc}";
+
+			return builtUrl;
+
+		}
+
+
+		//Deprecated - but here as reference for what was before - no longer using openfda
+		private string openfdaUrlBuilder(OpenFdaSearch_Model search)
+		{
+			string baseUrl = @"https://api.fda.gov/drug/label.json?search=";
+			string builtUrl = baseUrl;
+
+			if (!string.IsNullOrEmpty(search.Name))
+				builtUrl += $"openfda.brand_name:\"{search.Name}\"+";
+			//if (!string.IsNullOrEmpty(search.GenericName))
+			//    builtUrl += $"openfda.generic_name:{search.GenericName}+";
+			if (!string.IsNullOrEmpty(search.Ndc))
+				builtUrl += $"openfda.package_ndc:\"{search.Ndc}\"+";
+
+			builtUrl += "&limit=30";
+
+			return builtUrl;
+		}
+	}
 }
