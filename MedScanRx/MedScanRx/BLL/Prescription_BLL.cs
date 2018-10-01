@@ -20,11 +20,6 @@ namespace MedScanRx.BLL
 			_dal = new Prescription_DAL(configuration);
 		}
 
-		public async Task<List<PatientMessaging_Model>> GetInitialMessageInfo()
-		{
-			return await _dal.GetInitialMessageInfo().ConfigureAwait(false);
-		}
-
 		public async Task<string> SearchOpenFda(OpenFdaSearch_Model model)
 		{
 			HttpClient client = new HttpClient();
@@ -37,6 +32,8 @@ namespace MedScanRx.BLL
 
 			return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 		}
+
+
 
 		public async Task<string> SearchOpenFda(string rxcui)
 		{

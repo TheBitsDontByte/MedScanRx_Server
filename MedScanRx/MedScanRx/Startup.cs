@@ -77,7 +77,7 @@ namespace MedScanRx
 			});
 
 			app.UseCors(builder => builder.WithOrigins(new string[] { "http://localhost:3000",
-								"http://medscanrxtesting.s3-website-us-west-1.amazonaws.com" }
+								"http://medscanrx.s3-website-us-west-1.amazonaws.com" }
 			).AllowAnyMethod().AllowAnyHeader());
 
 			app.UseAuthentication();

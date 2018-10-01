@@ -77,49 +77,7 @@ namespace MedScanRx.DAL
 			}
 		}
 
-		public async Task<List<PatientMessaging_Model>> GetInitialMessageInfo()
-		{
-			try
-			{
-				List<PatientMessaging_Model> allPatientMessageInfo = new List<PatientMessaging_Model>();
-
-				SqlCommand cmd = new SqlCommand
-				{
-					CommandType = System.Data.CommandType.Text,
-					Connection = cn,
-					CommandText = "SELECT patient.FcmToken, COUNT(pa.PrescriptionAlertId) as NumberOfUpcomingAlerts, pa.AlertDateTime " +
-												" FROM PrescriptionAlert pa " +
-												" JOIN Prescription p ON pa.PrescriptionId = p.PrescriptionId " +
-												" JOIN PatientAccount patient on patient.PatientId = p.PatientId " +
-												" WHERE (pa.AlertDateTime BETWEEN GETUTCDATE() AND DATEADD(MINUTE, 60, GETUTCDATE())) AND pa.IsActive = 1 " +
-												"GROUP BY patient.FcmToken, pa.AlertDateTime	"
-
-
-				};
-
-				await cn.OpenAsync().ConfigureAwait(false);
-				using (var reader = cmd.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						allPatientMessageInfo.Add(DataRowToPatientMessagingMapper.Map(reader));
-					}
-				}
-
-				return allPatientMessageInfo;
-
-			}
-			catch (Exception ex)
-			{
-				throw new DatabaseException(ex.Message);
-			}
-			finally
-			{
-				cn.Close();
-			}
-		}
-
-		internal async Task DeactivatePastAlerts()
+		public async Task DeactivatePastAlerts()
 		{
 			try
 			{
@@ -137,8 +95,8 @@ namespace MedScanRx.DAL
 				//                CommandText = "update prescriptionalert set isactive = 1"
 				//            };
 
-				await cn.OpenAsync().ConfigureAwait(false);
-				cmd.ExecuteNonQueryAsync();
+				cn.Open();
+				cmd.ExecuteNonQuery();
 
 			}
 			catch (Exception ex)

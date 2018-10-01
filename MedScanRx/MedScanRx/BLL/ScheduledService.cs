@@ -21,26 +21,34 @@ namespace MedScanRx.BLL
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
 			bool deactivateHasRunThisHour = false;
-			bool initialMessageHasBeenSentThisHour = false;
+			bool initialMessageHasBeenSent = false;
+			bool secondMessageHasBeenSent = false;
 
 			while (!cancellationToken.IsCancellationRequested)
 			{
-				//Only run deactivate if it's 35 or 36 past. Numerous runs should produce the same results
-
 				if (DateTime.Now.Minute > 35 && !deactivateHasRunThisHour)
 				{
 					await _deactivatePastAlerts.Deactivate(cancellationToken);
 					deactivateHasRunThisHour = true;
 				}
-				if (DateTime.Now.Minute > 45 && !initialMessageHasBeenSentThisHour)
+
+				if (DateTime.Now.Minute > 45 && !initialMessageHasBeenSent)
 				{
-					await _cloudMessaging.SendInitialMessage();
-					initialMessageHasBeenSentThisHour = true;
+					await _cloudMessaging.SendMessage(Message.First);
+					initialMessageHasBeenSent = true;
+					secondMessageHasBeenSent = false;
 				}
-				if (DateTime.Now.Minute < 10 && deactivateHasRunThisHour && initialMessageHasBeenSentThisHour)
+
+				if (DateTime.Now.Minute > 10 && DateTime.Now.Minute < 15 && !secondMessageHasBeenSent)
+				{
+					await _cloudMessaging.SendMessage(Message.Second);
+					secondMessageHasBeenSent = true;
+				}
+
+				if (DateTime.Now.Minute < 10 && deactivateHasRunThisHour && initialMessageHasBeenSent)
 				{
 					deactivateHasRunThisHour = !deactivateHasRunThisHour;
-					initialMessageHasBeenSentThisHour = !initialMessageHasBeenSentThisHour;
+					initialMessageHasBeenSent = !initialMessageHasBeenSent;
 				}
 				await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
 

@@ -22,6 +22,8 @@ namespace MedScanRx.Controllers
 		private IConfiguration _configuration;
 
 		private const string UserNameClaim = "userName";
+
+		private const string PatientEmail = "email";
 		private const string PatientIdClaim = "patientId";
 
 		Auth_BLL _bll;
@@ -73,7 +75,7 @@ namespace MedScanRx.Controllers
 
 				var claims = new[]
 				{
-					new Claim(ClaimTypes.Email, email),
+					new Claim(PatientEmail, email),
 					new Claim(PatientIdClaim, patientId),
 					new Claim(ClaimTypes.Role, "MedScanRx_Patient")
 				};
@@ -101,7 +103,7 @@ namespace MedScanRx.Controllers
 					int patientId = _bll.GetPatientId(loginRequest);
 					var claims = new[]
 					{
-							new Claim(ClaimTypes.Email, loginRequest.UserName),
+							new Claim(PatientEmail, loginRequest.UserName),
 							new Claim(PatientIdClaim, patientId.ToString()),
 							new Claim(ClaimTypes.Role, "MedScanRx_Patient")
 					};
@@ -111,7 +113,7 @@ namespace MedScanRx.Controllers
 
 				return Unauthorized();
 			}
-			catch
+			catch (Exception ex)
 			{
 				return StatusCode(500, new { errorMessage = "Something went wrong logging in" });
 			}

@@ -11,32 +11,50 @@ using Newtonsoft.Json;
 
 namespace MedScanRx.ScheduledServices
 {
+	public enum Message
+	{
+		First,
+		Second
+	}
+
 	public class CloudMessaging
 	{
 
-		private readonly Prescription_BLL _bll;
+		private readonly AppPrescription_BLL _bll;
 
 		public CloudMessaging(IConfiguration configuration)
 		{
-			_bll = new Prescription_BLL(configuration);
+			_bll = new AppPrescription_BLL(configuration.GetConnectionString("MedScanRx_AWS"));
 		}
 
 
 
-		public async Task SendInitialMessage()
+		public async Task SendMessage(Message messageOrder)
 		{
 
-			List<PatientMessaging_Model> allPatientMessageInfo = await _bll.GetInitialMessageInfo().ConfigureAwait(false);
+			List<PatientMessaging_Model> allPatientMessageInfo = messageOrder == Message.First
+				? await _bll.GetInitialMessageInfo().ConfigureAwait(false)
+				: await _bll.GetSecondMessageInfo().ConfigureAwait(false);
 
 			foreach (var messageInfo in allPatientMessageInfo)
 			{
-				SendMessage(messageInfo);
+				CreateAndSendMessage(messageInfo, messageOrder);
 			}
 
 		}
 
-		public void SendMessage(PatientMessaging_Model messageInfo)
+		public void CreateAndSendMessage(PatientMessaging_Model messageInfo, Message messageOrder)
 		{
+			string messageBody = "";
+
+			string timeFromAlert = messageOrder == Message.First
+				? $"{60 - DateTime.Now.Minute} minutes"
+				: $"{DateTime.Now.Minute} minutes ago" ;
+
+			messageBody = messageOrder == Message.First
+				? messageInfo.NumberOfUpcomingAlerts > 1 ? $"You have {messageInfo.NumberOfUpcomingAlerts} medicines to take in about {timeFromAlert}" : $"You have a medicine to take in about {timeFromAlert}"
+				: messageInfo.NumberOfUpcomingAlerts > 1 ? $"You have {messageInfo.NumberOfUpcomingAlerts} medicines to take about {timeFromAlert}" : $"You have a medicine to take about {timeFromAlert}";
+
 
 			WebRequest tRequest = WebRequest.Create("https://fcm.googleapis.com/fcm/send");
 			tRequest.Method = "post";
@@ -52,7 +70,7 @@ namespace MedScanRx.ScheduledServices
 				content_available = true,
 				notification = new
 				{
-					body =  messageInfo.NumberOfUpcomingAlerts > 1 ? $"You have {messageInfo.NumberOfUpcomingAlerts} medicines to take in about 15 minutes" : $"You have a medicine to take in about 15 minutes",
+					body = messageBody,
 					title = "MedScanRx Upcoming Alerts",
 					badge = 1,
 				},
@@ -72,13 +90,10 @@ namespace MedScanRx.ScheduledServices
 						if (dataStreamResponse != null) using (StreamReader tReader = new StreamReader(dataStreamResponse))
 							{
 								String sResponseFromServer = tReader.ReadToEnd();
-								//result.Response = sResponseFromServer;
 							}
 					}
 				}
 			}
-			//end
-
 		}
 	}
 }
